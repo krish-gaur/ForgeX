@@ -1,0 +1,8 @@
+{
+  "name": "synthetic-corp-breach",
+  "provenance": "SYNTHETIC",
+  "description": "Deterministic synthetic breach scenario: phishing \u2192 encoded PowerShell \u2192 dropper \u2192 persistence \u2192 C2 \u2192 exfiltration.",
+  "generated_by": "ForgeX synthetic_data generator v1",
+  "os": "WINDOWS",
+  "seed": 26148
+}

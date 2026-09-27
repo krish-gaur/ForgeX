@@ -1,0 +1,55 @@
+[
+  {
+    "src_ip": "10.0.0.5",
+    "src_port": 49152,
+    "dst_ip": "203.0.113.9",
+    "dst_port": 4444,
+    "protocol": "TCP",
+    "state": "ESTABLISHED",
+    "pid": 4567,
+    "process_name": "powershell.exe",
+    "bytes_sent": 5242880,
+    "bytes_recv": 1200,
+    "source": "dataset"
+  },
+  {
+    "src_ip": "10.0.0.5",
+    "src_port": 51234,
+    "dst_ip": "198.51.100.23",
+    "dst_port": 22,
+    "protocol": "TCP",
+    "state": "ESTABLISHED",
+    "pid": 899,
+    "process_name": "sshd",
+    "bytes_sent": 4096,
+    "bytes_recv": 8192,
+    "source": "dataset"
+  },
+  {
+    "src_ip": "10.0.0.5",
+    "src_port": 52000,
+    "dst_ip": "10.0.0.7",
+    "dst_port": 445,
+    "protocol": "TCP",
+    "state": "SYN_SENT",
+    "pid": 4600,
+    "process_name": "updater.exe",
+    "bytes_sent": 512,
+    "bytes_recv": 0,
+    "source": "dataset"
+  },
+  {
+    "src_ip": "10.0.0.5",
+    "src_port": 53001,
+    "dst_ip": "10.0.0.2",
+    "dst_port": 53,
+    "protocol": "UDP",
+    "state": "STATELESS",
+    "pid": 1200,
+    "process_name": "svchost.exe",
+    "bytes_sent": 64,
+    "bytes_recv": 128,
+    "dns_query": "cdn-update.ngrok.io",
+    "source": "dataset"
+  }
+]

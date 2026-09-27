@@ -1,0 +1,56 @@
+[
+  {
+    "path": "C:\\Temp\\updater.exe",
+    "size": 482304,
+    "hash_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "hash_md5": "cccccccccccccccccccccccccccccccc",
+    "created_at": "2026-09-26T10:13:40+00:00",
+    "modified_at": "2026-09-26T10:13:40+00:00",
+    "accessed_at": "2026-09-26T10:15:00+00:00",
+    "permissions": "-rwxr-xr-x",
+    "owner": "svc_backup",
+    "is_executable": true,
+    "_links": [
+      {
+        "rel": "ACCESSED_FILE",
+        "process": {
+          "pid": 4600,
+          "name": "updater.exe"
+        }
+      }
+    ]
+  },
+  {
+    "path": "C:\\Temp\\data.zip",
+    "size": 5242880,
+    "hash_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "hash_md5": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "created_at": "2026-09-26T10:16:10+00:00",
+    "modified_at": "2026-09-26T10:16:10+00:00",
+    "accessed_at": "2026-09-26T10:16:16+00:00",
+    "permissions": "-rw-r--r--",
+    "owner": "svc_backup",
+    "is_executable": false,
+    "_links": [
+      {
+        "rel": "ACCESSED_FILE",
+        "process": {
+          "pid": 4700,
+          "name": "curl.exe"
+        }
+      }
+    ]
+  },
+  {
+    "path": "C:\\Users\\svc_backup\\Documents\\Q3-financials.xlsx",
+    "size": 1048576,
+    "hash_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "hash_md5": "ffffffffffffffffffffffffffffffff",
+    "created_at": "2026-09-26T10:00:30+00:00",
+    "modified_at": "2026-09-26T10:09:00+00:00",
+    "accessed_at": "2026-09-26T10:16:12+00:00",
+    "permissions": "-rw-r--r--",
+    "owner": "svc_backup",
+    "is_executable": false
+  }
+]

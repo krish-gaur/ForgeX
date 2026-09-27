@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FORGE-X — Production Architecture Document</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1c2230;
+    --border: #30363d; --accent: #1f8ef1; --accent2: #00d4aa;
+    --danger: #f85149; --warn: #e3b341; --success: #3fb950;
+    --text: #e6edf3; --muted: #8b949e; --code-bg: #0d1117;
+    font-size: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; }
+  
+  .layout { display: flex; min-height: 100vh; }
+  
+  nav {
+    width: 260px; min-width: 260px; background: var(--surface); border-right: 1px solid var(--border);
+    position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 16px 0; flex-shrink: 0;
+  }
+  nav .logo { padding: 8px 20px 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  nav .logo h1 { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  nav .logo p { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  nav a { display: block; padding: 6px 20px; font-size: 12px; color: var(--muted); text-decoration: none;
+    border-left: 2px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { color: var(--text); border-left-color: var(--accent); background: rgba(31,142,241,.08); }
+  nav .nav-group { font-size: 10px; color: var(--muted); padding: 12px 20px 4px; text-transform: uppercase; letter-spacing: .8px; }
+  
+  main { flex: 1; max-width: calc(100% - 260px); padding: 40px 48px; overflow-x: hidden; }
+  
+  section { margin-bottom: 64px; scroll-margin-top: 20px; }
+  h1.page-title { font-size: 28px; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+  h1.page-title span { color: var(--accent); }
+  .page-subtitle { color: var(--muted); margin-bottom: 32px; font-size: 13px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border); color: var(--text); display: flex; align-items: center; gap: 10px; }
+  h2 .sec-num { background: var(--accent); color: #fff; font-size: 11px; padding: 2px 7px;
+    border-radius: 4px; font-weight: 600; min-width: 24px; text-align: center; }
+  h3 { font-size: 15px; font-weight: 600; margin: 20px 0 10px; color: var(--accent2); }
+  h4 { font-size: 13px; font-weight: 600; margin: 14px 0 6px; color: var(--warn); }
+  p { line-height: 1.7; margin-bottom: 10px; color: var(--text); }
+  
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; }
+  .badge-must { background: rgba(248,81,73,.15); color: var(--danger); }
+  .badge-should { background: rgba(227,179,65,.15); color: var(--warn); }
+  .badge-nice { background: rgba(63,185,80,.15); color: var(--success); }
+  .badge-no { background: rgba(139,148,158,.12); color: var(--muted); }
+  .badge-get { background: rgba(31,142,241,.15); color: var(--accent); }
+  .badge-post { background: rgba(0,212,170,.15); color: var(--accent2); }
+  .badge-put { background: rgba(227,179,65,.15); color: var(--warn); }
+  .badge-del { background: rgba(248,81,73,.15); color: var(--danger); }
+  
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: var(--surface2); color: var(--muted); text-align: left; padding: 8px 12px; 
+    border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 10px; letter-spacing: .5px; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  
+  code { background: var(--code-bg); border: 1px solid var(--border); padding: 2px 6px;
+    border-radius: 4px; font-size: 12px; font-family: 'Consolas','SF Mono',monospace; color: var(--accent2); }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; overflow-x: auto; margin: 12px 0; }
+  pre code { background: none; border: none; padding: 0; color: #c9d1d9; }
+  
+  .mermaid-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 24px; margin: 16px 0; overflow-x: auto; }
+  .mermaid { background: transparent !important; }
+  
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 12px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card h4 { color: var(--accent); margin: 0 0 8px; font-size: 13px; }
+  .card p { font-size: 12px; color: var(--muted); margin: 0; }
+  
+  .info-box { border-left: 3px solid var(--accent); background: rgba(31,142,241,.07);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .warn-box { border-left: 3px solid var(--warn); background: rgba(227,179,65,.07);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .danger-box { border-left: 3px solid var(--danger); background: rgba(248,81,73,.07);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  .success-box { border-left: 3px solid var(--success); background: rgba(63,185,80,.07);
+    padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 13px; }
+  
+  .api-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin: 14px 0; }
+  .api-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .api-body { padding: 16px; }
+  .api-body h4 { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin: 12px 0 6px; }
+  .api-body h4:first-child { margin-top: 0; }
+  
+  .flow { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .flow-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 12px; font-size: 12px; }
+  .flow-arrow { color: var(--muted); padding-top: 7px; }
+  
+  ul, ol { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 4px; font-size: 13px; line-height: 1.6; }
+  
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 4px 0; padding-left: 20px; position: relative; font-size: 12px; }
+  .checklist li::before { content: '✓'; position: absolute; left: 0; color: var(--success); }
+  
+  .risk-high { color: var(--danger); font-weight: 600; }
+  .risk-med { color: var(--warn); font-weight: 600; }
+  .risk-low { color: var(--success); font-weight: 600; }
+  
+  @media (max-width: 900px) {
+    nav { display: none; }
+    main { max-width: 100%; padding: 24px 20px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav id="sidebar">
+  <div class="logo">
+    <h1>⚙ FORGE-X</h1>
+    <p>Production Architecture v1.0</p>
+  </div>
+  <span class="nav-group">Overview</span>
+  <a href="#s1">01 · Requirements</a>
+  <a href="#s2">02 · Product Workflows</a>
+  <span class="nav-group">Architecture</span>
+  <a href="#s3">03 · System Architecture</a>
+  <a href="#s4">04 · Technology Stack</a>
+  <a href="#s5">05 · Database Schema</a>
+  <span class="nav-group">Contracts</span>
+  <a href="#s6">06 · API Specification</a>
+  <a href="#s7">07 · Frontend Architecture</a>
+  <a href="#s8">08 · Backend Architecture</a>
+  <span class="nav-group">Subsystems</span>
+  <a href="#s9">09 · AI Architecture</a>
+  <a href="#s10">10 · Security Architecture</a>
+  <a href="#s11">11 · Scalability Plan</a>
+  <a href="#s12">12 · Testing Strategy</a>
+  <span class="nav-group">Delivery</span>
+  <a href="#s13">13 · MVP Scope</a>
+  <a href="#s14">14 · Implementation Roadmap</a>
+  <a href="#s15">15 · Cursor Handoff</a>
+  <a href="#s16">16 · OpenCode Handoff</a>
+  <a href="#s17">17 · Risks</a>
+  <a href="#s18">18 · Definition of Done</a>
+</nav>
+
+<main>
+<h1 class="page-title"><span>FORGE-X</span> — System Architecture</h1>
+<p class="page-subtitle">SIH26148 · Theme: Blockchain & Cybersecurity · Team: AlGloryThm · Lead Architect Document v1.0</p>
+
+<!-- ============================================================ -->
+<section id="s1">
+<h2><span class="sec-num">01</span> Requirements</h2>
+
+<h3>Problem Statement (Exact)</h3>
+<div class="danger-box">
+  <strong>SIH26148:</strong> Security controls (EDR, AV, Firewall) designed to stop attackers also interrupt and block legitimate forensic tools run by authorized investigators. When an investigator tries to collect evidence — processes, files, users, network activity, system events — the security stack flags the collection activity as suspicious and disrupts it. This forces investigators to use fragmented manual tools, results in missed evidence, and makes incident reconstruction slow and incomplete.
+</div>
+
+<h3>Target Users</h3>
+<table>
+  <tr><th>User Role</th><th>Context</th><th>Primary Need</th></tr>
+  <tr><td>Lead Investigator</td><td>Enterprise IR / Law Enforcement Cyber Unit</td><td>Run and manage full investigations; approve FQL execution</td></tr>
+  <tr><td>Investigator</td><td>Authorized digital forensic analyst</td><td>Write FQL queries, collect evidence, view correlation results</td></tr>
+  <tr><td>Auditor</td><td>Compliance / Legal officer</td><td>Review investigation audit trail, verify evidence integrity</td></tr>
+  <tr><td>Admin</td><td>FORGE-X platform administrator</td><td>Manage users, configure policies, manage target systems</td></tr>
+</table>
+
+<h3>Prioritized Requirements</h3>
+<table>
+  <tr><th>Priority</th><th>Requirement</th><th>Source</th></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>FQL (Forensic Query Language) — simple DSL to express investigation intent</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Policy-controlled execution layer — validates every collector call before execution</td><td>Slide 2,4</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Process collector (Windows + Linux)</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>File system collector (Windows + Linux)</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Network activity collector (PCAP / Zeek)</td><td>Slide 3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>User activity collector</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>System event collector (Windows EventLog / Linux syslog/auditd)</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>SHA-256 integrity hashing of every evidence item at collection time</td><td>Slide 2</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Evidence stored in PostgreSQL (structured) + Neo4j (graph correlations)</td><td>Slide 3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Timeline visualization of all collected events</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Evidence graph (USER→PROCESS→FILE→NETWORK→EVENT)</td><td>Slide 2</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>LLM-powered "What Happened?" incident reconstruction</td><td>Slide 2,3</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Full audit log of all forensic actions taken</td><td>Slide 4</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>JWT-based authentication + RBAC (Admin, Lead, Investigator, Auditor)</td><td>Derived</td></tr>
+  <tr><td><span class="badge badge-must">MUST</span></td><td>Investigation report generation (PDF)</td><td>Slide 3</td></tr>
+  <tr><td><span class="badge badge-should">SHOULD</span></td><td>RAG over collected evidence for investigator Q&A</td><td>Slide 3</td></tr>
+  <tr><td><span class="badge badge-should">SHOULD</span></td><td>MITRE ATT&CK technique mapping of correlated evidence</td><td>Slide 6</td></tr>
+  <tr><td><span class="badge badge-should">SHOULD</span></td><td>Blockchain-anchored evidence hashes (for SIH theme)</td><td>SIH Theme</td></tr>
+  <tr><td><span class="badge badge-should">SHOULD</span></td><td>Evidence export (JSON, CSV)</td><td>Derived</td></tr>
+  <tr><td><span class="badge badge-nice">NICE</span></td><td>Multi-endpoint investigation (network-wide forensics)</td><td>Slide 4</td></tr>
+  <tr><td><span class="badge badge-nice">NICE</span></td><td>Real-time collection streaming via WebSocket</td><td>Derived</td></tr>
+  <tr><td><span class="badge badge-nice">NICE</span></td><td>Mobile-responsive view for on-the-go monitoring</td><td>Derived</td></tr>
+  <tr><td><span class="badge badge-no">DO NOT BUILD</span></td><td>EDR/AV bypass or evasion techniques — FORGE-X is an authorized tool, not an evasion tool</td><td>Ethics</td></tr>
+  <tr><td><span class="badge badge-no">DO NOT BUILD</span></td><td>Malware analysis sandbox</td><td>Out of scope</td></tr>
+  <tr><td><span class="badge badge-no">DO NOT BUILD</span></td><td>Vulnerability scanner / exploitation framework</td><td>Out of scope</td></tr>
+</table>
+
+<h3>Ambiguities / Flags</h3>
+<div class="warn-box">
+  <strong>Flag 1 — FQL Grammar Scope:</strong> The PPT does not define FQL syntax. This document specifies it fully in §08. Agents must NOT invent alternative grammar.<br><br>
+  <strong>Flag 2 — Deployment Target:</strong> PPT implies a local/on-premises tool, not cloud SaaS. FORGE-X runs as Docker containers on the investigator's workstation or an on-premises server. There is no multi-tenant cloud hosting in MVP.<br><br>
+  <strong>Flag 3 — Collector Execution Model:</strong> Collectors can run in two modes: (a) local — if the target is the same machine as FORGE-X; (b) remote SSH agent — if the target is a different endpoint. MVP targets local execution; SSH-based remote is SHOULD HAVE.<br><br>
+  <strong>Flag 4 — Blockchain Integration:</strong> The hackathon theme is "Blockchain & Cybersecurity" but the solution slides do not specify a blockchain implementation. Architecture adds evidence hash anchoring on Ethereum Sepolia testnet as a SHOULD HAVE for demo differentiation.
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="s2">
+<h2><span class="sec-num">02</span> Product Workflows</h2>
+
+<h3>WF-01 · Investigator Starts New Investigation</h3>
+<div class="flow">
+  <div class="flow-step">🕵️ Investigator logs in</div><div class="flow-arrow">→</div>
+  <div class="flow-step">POST /investigations {name, target, description}</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Validate: name required, target IP/hostname required</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Create Investigation record, status=ACTIVE</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Audit log entry created</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Redirect to /investigations/:id</div>
+</div>
+<p><strong>Failure:</strong> Duplicate name → 409 CONFLICT. Missing target → 422 UNPROCESSABLE.</p>
+
+<h3>WF-02 · Write and Execute FQL Query</h3>
+<div class="flow">
+  <div class="flow-step">Investigator writes FQL</div><div class="flow-arrow">→</div>
+  <div class="flow-step">POST /fql/validate (syntax check)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">POST /fql/execute</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Policy Engine evaluates request</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Forensic Orchestrator spawns collectors</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Evidence collected → hashed → stored</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Job ID returned → frontend polls status</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Evidence appears in dashboard</div>
+</div>
+<p><strong>Failure paths:</strong> Policy denied → 403 with reason. Collector timeout (30s) → partial evidence saved, job status=PARTIAL. Target unreachable → 503. FQL parse error → 422 with line/column.</p>
+
+<h3>WF-03 · Evidence Correlation (AI)</h3>
+<div class="flow">
+  <div class="flow-step">Investigator clicks "Correlate"</div><div class="flow-arrow">→</div>
+  <div class="flow-step">POST /investigations/:id/ai/correlate</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Evidence items loaded from PostgreSQL</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Relationships queried from Neo4j</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Context built for LLM (RAG retrieval)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">LLM generates structured correlation result</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Result validated (JSON schema)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Stored + displayed in dashboard</div>
+</div>
+<p><strong>Failure paths:</strong> LLM timeout → retry x2, then return partial result with flag. No evidence → 400 "Collect evidence first". Invalid LLM output → discard, return error, do NOT show hallucinated output.</p>
+
+<h3>WF-04 · Generate Investigation Report</h3>
+<div class="flow">
+  <div class="flow-step">Investigator clicks "Generate Report"</div><div class="flow-arrow">→</div>
+  <div class="flow-step">POST /investigations/:id/reports</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Background job queued (Celery)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Job: fetch evidence + correlations + AI analysis</div><div class="flow-arrow">→</div>
+  <div class="flow-step">LLM generates narrative summary</div><div class="flow-arrow">→</div>
+  <div class="flow-step">PDF rendered (WeasyPrint)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Stored, download link returned</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Notification to investigator</div>
+</div>
+
+<h3>WF-05 · Auditor Reviews Evidence Integrity</h3>
+<div class="flow">
+  <div class="flow-step">Auditor logs in (role: AUDITOR)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">GET /investigations/:id/evidence (read-only)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">For each item: verify SHA-256 matches stored hash</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Optional: verify blockchain anchor hash (Sepolia)</div><div class="flow-arrow">→</div>
+  <div class="flow-step">GET /investigations/:id/audit-log</div><div class="flow-arrow">→</div>
+  <div class="flow-step">Download chain-of-custody report</div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="s3">
+<h2><span class="sec-num">03</span> System Architecture</h2>
+
+<div class="info-box"><strong>Deployment model:</strong> Modular monolith running in Docker Compose on the investigator's workstation or an on-premises server. The forensic collectors run as Python sub-processes (local) or over SSH (remote). No cloud SaaS dependency in MVP.</div>
+
+<h3>Architecture Diagram</h3>
+<div class="mermaid-box">
+<pre class="mermaid">
+graph TB
+  subgraph BROWSER["🖥 Investigator Browser"]
+    UI["Next.js App<br/>(FQL Editor · Dashboard · Timeline · Graph)"]
+  end
+
+  subgraph GATEWAY["API Gateway · Port 8000"]
+    NGINX["Nginx Reverse Proxy<br/>(TLS, rate-limit, CORS)"]
+  end
+
+  subgraph APP["FORGE-X Backend · FastAPI"]
+    AUTH["Auth Service<br/>(JWT · RBAC)"]
+    FQL["FQL Parser/Validator<br/>(Lark grammar)"]
+    POLICY["Policy Engine<br/>(YAML rules)"]
+    ORCH["Forensic Orchestrator<br/>(Job Manager)"]
+    EVID["Evidence Service<br/>(hash · store · index)"]
+    AI["AI / Intelligence Service<br/>(LLM · RAG · Correlator)"]
+    REPORT["Report Service<br/>(PDF generator)"]
+    AUDIT["Audit Logger"]
+    WS["WebSocket Hub<br/>(job status updates)"]
+  end
+
+  subgraph WORKERS["Celery Workers"]
+    W1["Collector Worker"]
+    W2["AI Worker"]
+    W3["Report Worker"]
+  end
+
+  subgraph COLLECTORS["Forensic Collectors"]
+    PC["Process Collector<br/>(psutil / WMI)"]
+    FC["File Collector<br/>(os.walk)"]
+    NC["Network Collector<br/>(PCAP / Zeek)"]
+    UC["User Collector<br/>(pwd / SAM)"]
+    EC["Event Collector<br/>(EventLog / syslog/auditd)"]
+    TC["Timeline Builder"]
+  end
+
+  subgraph DATA["Data Layer"]
+    PG[("PostgreSQL 16<br/>(investigations · evidence · users · audit)")]
+    NEO[("Neo4j 5<br/>(evidence graph · correlations)")]
+    REDIS[("Redis 7<br/>(cache · job queue · sessions)")]
+    FS["File Store<br/>(PCAP · memory dumps · reports)"]
+    VEC[("pgvector<br/>(evidence embeddings for RAG)")]
+  end
+
+  subgraph AI_EXT["AI / External"]
+    LLM["LLM Provider<br/>(OpenAI GPT-4o / Anthropic Claude)"]
+    BC["Blockchain Anchor<br/>(Ethereum Sepolia testnet)"]
+  end
+
+  subgraph TARGET["Target System"]
+    WIN["Windows Agent<br/>(PowerShell / WMI / ETW)"]
+    LINUX["Linux Agent<br/>(bash / proc / auditd)"]
+  end
+
+  UI -->|HTTPS/WS| NGINX
+  NGINX --> AUTH
+  NGINX --> FQL
+  NGINX --> ORCH
+  NGINX --> EVID
+  NGINX --> AI
+  NGINX --> REPORT
+  NGINX --> WS
+
+  FQL --> POLICY
+  POLICY --> ORCH
+  ORCH -->|enqueue| REDIS
+  REDIS -->|dequeue| W1
+  W1 --> PC & FC & NC & UC & EC & TC
+  PC & FC & NC --> WIN
+  PC & FC & NC & UC & EC --> LINUX
+
+  ORCH --> AUDIT
+  W1 --> EVID
+  EVID --> PG
+  EVID --> NEO
+  EVID --> FS
+  EVID --> VEC
+  EVID -->|hash anchor| BC
+
+  W2 --> AI
+  AI --> LLM
+  AI --> VEC
+
+  W3 --> REPORT
+  REPORT --> FS
+
+  AUTH --> PG
+  AUDIT --> PG
+</pre>
+</div>
+
+<h3>Component Responsibilities</h3>
+<table>
+  <tr><th>Component</th><th>Responsibility</th><th>Key Constraint</th></tr>
+  <tr><td>Nginx</td><td>TLS termination, CORS, rate limiting (100 req/min/IP), static file serving for Next.js</td><td>Must not log Authorization headers</td></tr>
+  <tr><td>Auth Service</td><td>JWT issuance (HS256, 1h access token, 7d refresh), RBAC enforcement middleware</td><td>Refresh tokens stored in Redis; revocable</td></tr>
+  <tr><td>FQL Parser</td><td>Parses FQL text into structured AST using Lark grammar; returns parse errors with line/col</td><td>No execution occurs in parser — parse only</td></tr>
+  <tr><td>Policy Engine</td><td>Evaluates collector request against YAML policy rules. Grants or denies with reason code</td><td>Policy loaded from DB at startup; cached in Redis 60s</td></tr>
+  <tr><td>Forensic Orchestrator</td><td>Translates approved FQL AST into collector jobs; enqueues to Redis/Celery; tracks job status</td><td>Each FQL execution = one Job with N sub-tasks</td></tr>
+  <tr><td>Evidence Service</td><td>Receives raw collector output; SHA-256 hashes it; stores in PostgreSQL; creates Neo4j nodes/edges; indexes embeddings in pgvector</td><td>Hash computed before any DB write; immutable after write</td></tr>
+  <tr><td>AI Service</td><td>Builds RAG context from pgvector; calls LLM with structured prompt; validates output JSON schema; stores result</td><td>Provider key NEVER leaves backend; output validated before storage</td></tr>
+  <tr><td>Report Service</td><td>Fetches all investigation data, calls AI for narrative, renders PDF via WeasyPrint</td><td>Runs as background Celery task; report stored in FS</td></tr>
+  <tr><td>Audit Logger</td><td>Appends immutable audit entries (who, when, what, result) to PostgreSQL audit_logs table</td><td>Sync write; cannot be disabled by any user role</td></tr>
+  <tr><td>WebSocket Hub</td><td>Pushes job status updates to investigator browser in real time</td><td>Auth required via WS handshake token</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s4">
+<h2><span class="sec-num">04</span> Technology Stack</h2>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Why</th><th>MVP?</th></tr>
+  <tr><td>Frontend</td><td>Next.js 15 (App Router, TypeScript)</td><td>Specified in tech stack slide. SSR for report pages, RSC for fast dashboard. Strong TypeScript ecosystem for type-safe API integration.</td><td>✅ Yes</td></tr>
+  <tr><td>UI Components</td><td>Tailwind CSS + shadcn/ui</td><td>Rapid development; forensic dashboard needs dense data tables and cards. Accessible by default.</td><td>✅ Yes</td></tr>
+  <tr><td>Graph Visualization</td><td>React Flow (evidence graph) + D3.js (timeline)</td><td>React Flow renders interactive node graphs for USER→PROCESS→FILE chains. D3 for time-series timeline.</td><td>✅ Yes</td></tr>
+  <tr><td>State Management</td><td>Zustand + React Query (TanStack)</td><td>Zustand for global investigation state. React Query for server-state caching, polling, and optimistic updates.</td><td>✅ Yes</td></tr>
+  <tr><td>Backend</td><td>Python 3.12 + FastAPI</td><td>Specified in tech stack slide. Async-native, auto OpenAPI docs, excellent ecosystem for system-level scripting (psutil, scapy, etc.)</td><td>✅ Yes</td></tr>
+  <tr><td>FQL Parser</td><td>Lark (Python parsing toolkit)</td><td>Clean EBNF grammar definition. Produces an AST. Gives precise error positions. Pure Python — no external service.</td><td>✅ Yes</td></tr>
+  <tr><td>Task Queue</td><td>Celery 5 + Redis</td><td>Collector jobs are async (can take 5-60s). Celery handles retries, timeouts, and worker concurrency. Redis as broker.</td><td>✅ Yes</td></tr>
+  <tr><td>Primary DB</td><td>PostgreSQL 16 + pgvector</td><td>Specified in tech stack slide. Structured evidence storage, ACID compliance for chain-of-custody. pgvector eliminates need for separate vector DB in MVP.</td><td>✅ Yes</td></tr>
+  <tr><td>Graph DB</td><td>Neo4j 5 Community</td><td>Specified in tech stack slide. Cypher queries for USER→PROCESS→FILE→NETWORK→EVENT correlation. Essential for "incident story" feature.</td><td>✅ Yes</td></tr>
+  <tr><td>Cache / Queue</td><td>Redis 7</td><td>Job queue broker (Celery), session store, policy cache, WebSocket pub/sub. One service, multiple purposes.</td><td>✅ Yes</td></tr>
+  <tr><td>Network Capture</td><td>PCAP (libpcap/pyshark) + Zeek</td><td>Specified in tech stack slide. Zeek transforms raw PCAP into structured connection logs, DNS, HTTP, SSL records.</td><td>✅ Yes</td></tr>
+  <tr><td>LLM</td><td>Anthropic Claude claude-sonnet-4-6 (primary) / OpenAI GPT-4o (fallback)</td><td>Structured output support, function calling, long context for evidence summaries. Provider abstraction layer handles fallback.</td><td>✅ Yes</td></tr>
+  <tr><td>PDF Reports</td><td>WeasyPrint</td><td>Renders HTML→PDF with full CSS support. No external service needed. Runs in backend.</td><td>✅ Yes</td></tr>
+  <tr><td>Blockchain Anchor</td><td>web3.py + Ethereum Sepolia testnet</td><td>SIH theme requirement. Evidence hash + timestamp submitted to Sepolia. Provides verifiable, tamper-evident chain-of-custody proof.</td><td>⚡ Demo</td></tr>
+  <tr><td>Container</td><td>Docker Compose</td><td>Single-command deployment. All services (FastAPI, Postgres, Neo4j, Redis, Nginx) in one compose file. No Kubernetes needed for MVP.</td><td>✅ Yes</td></tr>
+  <tr><td>Auth</td><td>PyJWT + passlib (bcrypt)</td><td>Lightweight, no external OAuth service needed. JWT with RS256 for production, HS256 for dev.</td><td>✅ Yes</td></tr>
+  <tr><td>Process Forensics</td><td>psutil (cross-platform), python-evtx (Windows events)</td><td>Cross-platform process/memory collection. python-evtx parses Windows Event Log .evtx files.</td><td>✅ Yes</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s5">
+<h2><span class="sec-num">05</span> Database Schema</h2>
+
+<h3>PostgreSQL Schema</h3>
+
+<pre><code>-- Users and Auth
+CREATE TABLE users (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email       VARCHAR(255) UNIQUE NOT NULL,
+  username    VARCHAR(100) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,  -- bcrypt
+  role        VARCHAR(20) NOT NULL CHECK (role IN ('ADMIN','LEAD_INVESTIGATOR','INVESTIGATOR','AUDITOR')),
+  is_active   BOOLEAN DEFAULT TRUE,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_users_email ON users(email);
+
+-- Investigations (Cases)
+CREATE TABLE investigations (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name          VARCHAR(255) NOT NULL,
+  description   TEXT,
+  target_host   VARCHAR(255) NOT NULL,  -- IP or hostname of target system
+  target_os     VARCHAR(20) CHECK (target_os IN ('WINDOWS','LINUX','UNKNOWN')),
+  status        VARCHAR(20) DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE','COMPLETED','ARCHIVED','SUSPENDED')),
+  created_by    UUID NOT NULL REFERENCES users(id),
+  lead_investigator UUID REFERENCES users(id),
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW(),
+  closed_at     TIMESTAMPTZ
+);
+CREATE INDEX idx_investigations_created_by ON investigations(created_by);
+CREATE INDEX idx_investigations_status ON investigations(status);
+
+-- Policies
+CREATE TABLE policies (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name          VARCHAR(100) UNIQUE NOT NULL,
+  description   TEXT,
+  rules         JSONB NOT NULL,  -- Policy YAML parsed to JSON
+  is_default    BOOLEAN DEFAULT FALSE,
+  is_active     BOOLEAN DEFAULT TRUE,
+  created_by    UUID NOT NULL REFERENCES users(id),
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- FQL Queries (submitted by investigator)
+CREATE TABLE fql_queries (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  investigation_id UUID NOT NULL REFERENCES investigations(id) ON DELETE CASCADE,
+  raw_fql         TEXT NOT NULL,
+  parsed_ast      JSONB,             -- AST output from parser
+  status          VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING','VALIDATED','POLICY_DENIED','QUEUED','RUNNING','COMPLETED','FAILED','PARTIAL')),
+  policy_decision JSONB,             -- Policy engine response
+  submitted_by    UUID NOT NULL REFERENCES users(id),
+  submitted_at    TIMESTAMPTZ DEFAULT NOW(),
+  completed_at    TIMESTAMPTZ,
+  error_message   TEXT
+);
+CREATE INDEX idx_fql_investigation ON fql_queries(investigation_id);
+
+-- Collector Executions (one per collector per FQL query)
+CREATE TABLE collector_executions (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  fql_query_id    UUID NOT NULL REFERENCES fql_queries(id) ON DELETE CASCADE,
+  collector_type  VARCHAR(30) NOT NULL CHECK (collector_type IN ('PROCESS','FILE','NETWORK','USER','EVENT','TIMELINE')),
+  status          VARCHAR(20) DEFAULT 'RUNNING' CHECK (status IN ('RUNNING','COMPLETED','FAILED','TIMEOUT','SKIPPED')),
+  started_at      TIMESTAMPTZ DEFAULT NOW(),
+  completed_at    TIMESTAMPTZ,
+  items_collected INT DEFAULT 0,
+  error_message   TEXT,
+  raw_params      JSONB              -- Params derived from FQL AST
+);
+
+-- Evidence Items (core entity)
+CREATE TABLE evidence_items (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  investigation_id  UUID NOT NULL REFERENCES investigations(id) ON DELETE CASCADE,
+  execution_id      UUID REFERENCES collector_executions(id),
+  evidence_type     VARCHAR(30) NOT NULL CHECK (evidence_type IN ('PROCESS','FILE','NETWORK_CONNECTION','USER_ACCOUNT','SYSTEM_EVENT','TIMELINE_ENTRY','PCAP_FILE','LOG_ENTRY')),
+  collected_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  target_host       VARCHAR(255) NOT NULL,
+  data              JSONB NOT NULL,           -- Structured evidence payload
+  data_hash         VARCHAR(64) NOT NULL,     -- SHA-256 of data field (hex)
+  raw_file_path     VARCHAR(500),             -- If evidence is a file (PCAP etc.)
+  blockchain_tx     VARCHAR(100),             -- Sepolia tx hash (optional)
+  blockchain_status VARCHAR(20) DEFAULT 'NOT_SUBMITTED' CHECK (blockchain_status IN ('NOT_SUBMITTED','PENDING','CONFIRMED','FAILED')),
+  embedding_id      INT,                      -- pgvector reference
+  collected_by      UUID NOT NULL REFERENCES users(id),
+  CONSTRAINT unique_evidence_hash UNIQUE (investigation_id, data_hash)
+);
+CREATE INDEX idx_evidence_investigation ON evidence_items(investigation_id);
+CREATE INDEX idx_evidence_type ON evidence_items(evidence_type);
+CREATE INDEX idx_evidence_collected_at ON evidence_items(collected_at);
+
+-- pgvector embeddings for RAG
+CREATE TABLE evidence_embeddings (
+  id              SERIAL PRIMARY KEY,
+  evidence_id     UUID NOT NULL REFERENCES evidence_items(id) ON DELETE CASCADE,
+  embedding       vector(1536),              -- OpenAI text-embedding-3-small
+  text_content    TEXT,                      -- Human-readable representation used for embedding
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_embeddings_evidence ON evidence_embeddings(evidence_id);
+-- Vector similarity index (IVFFlat)
+CREATE INDEX idx_embeddings_vector ON evidence_embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+
+-- AI Correlation Results
+CREATE TABLE ai_analyses (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  investigation_id UUID NOT NULL REFERENCES investigations(id) ON DELETE CASCADE,
+  analysis_type   VARCHAR(30) NOT NULL CHECK (analysis_type IN ('CORRELATION','EXPLANATION','QUERY_RESPONSE','MITRE_MAPPING')),
+  prompt_tokens   INT,
+  completion_tokens INT,
+  model_used      VARCHAR(50),
+  input_evidence_ids UUID[],               -- Evidence items used as context
+  result          JSONB NOT NULL,          -- Structured LLM output
+  confidence_score FLOAT,                  -- 0.0-1.0 if model provides
+  created_by      UUID NOT NULL REFERENCES users(id),
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Investigation Reports
+CREATE TABLE investigation_reports (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  investigation_id UUID NOT NULL REFERENCES investigations(id) ON DELETE CASCADE,
+  title           VARCHAR(255),
+  report_type     VARCHAR(20) DEFAULT 'FULL' CHECK (report_type IN ('FULL','SUMMARY','CHAIN_OF_CUSTODY')),
+  status          VARCHAR(20) DEFAULT 'GENERATING' CHECK (status IN ('GENERATING','READY','FAILED')),
+  file_path       VARCHAR(500),            -- Path to PDF in file store
+  file_size_bytes BIGINT,
+  created_by      UUID NOT NULL REFERENCES users(id),
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  completed_at    TIMESTAMPTZ
+);
+
+-- Audit Log (immutable)
+CREATE TABLE audit_logs (
+  id              BIGSERIAL PRIMARY KEY,
+  actor_id        UUID REFERENCES users(id),
+  actor_email     VARCHAR(255),            -- Denormalized for permanence
+  action          VARCHAR(100) NOT NULL,   -- e.g. INVESTIGATION_CREATED, FQL_EXECUTED
+  resource_type   VARCHAR(50),
+  resource_id     VARCHAR(100),
+  metadata        JSONB,
+  ip_address      INET,
+  user_agent      TEXT,
+  result          VARCHAR(20) CHECK (result IN ('SUCCESS','FAILURE','DENIED')),
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX idx_audit_actor ON audit_logs(actor_id);
+CREATE INDEX idx_audit_created ON audit_logs(created_at);
+CREATE INDEX idx_audit_action ON audit_logs(action);</code></pre>
+
+<h3>Neo4j Schema (Graph)</h3>
+<pre><code>// Node labels and properties
+(:User        { id, username, host, sid_or_uid, last_login, evidence_id })
+(:Process     { id, pid, name, cmdline, user, parent_pid, started_at, hash_md5, hash_sha256, evidence_id })
+(:File        { id, path, size, hash_sha256, modified_at, created_at, accessed_at, evidence_id })
+(:NetworkConn { id, src_ip, src_port, dst_ip, dst_port, protocol, bytes, started_at, evidence_id })
+(:SystemEvent { id, event_id, event_type, description, timestamp, evidence_id })
+
+// Relationship types
+(:User)-[:LAUNCHED]->(:Process)                // User started process
+(:Process)-[:SPAWNED]->(:Process)              // Parent→child process
+(:Process)-[:ACCESSED_FILE]->(:File)           // Process read/wrote file
+(:Process)-[:MADE_CONNECTION]->(:NetworkConn)  // Process initiated network
+(:Process)-[:TRIGGERED_EVENT]->(:SystemEvent)  // Process caused an event
+(:User)-[:TRIGGERED_EVENT]->(:SystemEvent)     // User caused an event
+(:File)-[:LOADED_BY]->(:Process)               // DLL/library loaded
+(:NetworkConn)-[:RESOLVED_FROM]->(:SystemEvent) // DNS resolution event
+
+// Relationship properties: { investigation_id, detected_at, confidence }
+
+// Key Cypher queries used by Correlation Engine:
+// 1. Find all processes spawned by a user:
+MATCH (u:User {evidence_id:$uid})-[:LAUNCHED]->(p:Process) RETURN p
+
+// 2. Full incident chain starting from suspicious process:
+MATCH path = (u:User)-[:LAUNCHED]->(p:Process)-[:MADE_CONNECTION|ACCESSED_FILE*1..3]->()
+WHERE p.name CONTAINS $suspicious_name RETURN path
+
+// 3. Lateral movement detection:
+MATCH (p:Process)-[:MADE_CONNECTION]->(n:NetworkConn)
+WHERE n.dst_ip &lt;&gt; $local_subnet RETURN p, n</code></pre>
+
+<h3>Entity Relationship Diagram</h3>
+<div class="mermaid-box">
+<pre class="mermaid">
+erDiagram
+  users ||--o{ investigations : "creates"
+  users ||--o{ fql_queries : "submits"
+  users ||--o{ evidence_items : "collects"
+  users ||--o{ ai_analyses : "triggers"
+  users ||--o{ audit_logs : "generates"
+
+  investigations ||--o{ fql_queries : "contains"
+  investigations ||--o{ evidence_items : "holds"
+  investigations ||--o{ ai_analyses : "has"
+  investigations ||--o{ investigation_reports : "produces"
+
+  fql_queries ||--o{ collector_executions : "spawns"
+  collector_executions ||--o{ evidence_items : "produces"
+  evidence_items ||--o{ evidence_embeddings : "has"
+
+  policies {
+    uuid id PK
+    string name
+    jsonb rules
+    bool is_default
+  }
+  users {
+    uuid id PK
+    string email
+    string role
+    bool is_active
+  }
+  investigations {
+    uuid id PK
+    string name
+    string target_host
+    string target_os
+    string status
+  }
+  fql_queries {
+    uuid id PK
+    text raw_fql
+    jsonb parsed_ast
+    string status
+  }
+  collector_executions {
+    uuid id PK
+    string collector_type
+    string status
+    int items_collected
+  }
+  evidence_items {
+    uuid id PK
+    string evidence_type
+    jsonb data
+    string data_hash
+    string blockchain_tx
+  }
+  evidence_embeddings {
+    int id PK
+    vector embedding
+    text text_content
+  }
+  ai_analyses {
+    uuid id PK
+    string analysis_type
+    jsonb result
+    float confidence_score
+  }
+  investigation_reports {
+    uuid id PK
+    string status
+    string file_path
+  }
+  audit_logs {
+    bigint id PK
+    string action
+    string resource_type
+    string result
+    timestamptz created_at
+  }
+</pre>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="s6">
+<h2><span class="sec-num">06</span> API Specification</h2>
+
+<div class="info-box">Base URL: <code>https://forgex.local/api/v1</code> · Auth: <code>Authorization: Bearer &lt;JWT&gt;</code> · Content-Type: <code>application/json</code></div>
+
+<h3>Standard Error Format</h3>
+<pre><code>{
+  "error": {
+    "code": "POLICY_DENIED",          // Machine-readable code
+    "message": "Collector 'network' requires LEAD_INVESTIGATOR role",
+    "details": { "collector": "network", "required_role": "LEAD_INVESTIGATOR" },
+    "request_id": "req_01J8KP..."     // For support/audit
+  }
+}</code></pre>
+
+<h3>Auth Endpoints</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/auth/login</code> — Authenticate and receive tokens</div>
+  <div class="api-body">
+    <h4>Request</h4>
+    <pre><code>{ "username": "j.doe", "password": "hunter2" }</code></pre>
+    <h4>Response 200</h4>
+    <pre><code>{ "access_token": "eyJ...", "refresh_token": "eyJ...", "expires_in": 3600,
+  "user": { "id": "uuid", "username": "j.doe", "role": "INVESTIGATOR" } }</code></pre>
+    <h4>Errors</h4> 401 invalid credentials · 403 account disabled
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/auth/refresh</code> — Refresh access token</div>
+  <div class="api-body">
+    <h4>Request</h4><pre><code>{ "refresh_token": "eyJ..." }</code></pre>
+    <h4>Response 200</h4><pre><code>{ "access_token": "eyJ...", "expires_in": 3600 }</code></pre>
+    <h4>Errors</h4> 401 expired/revoked refresh token
+  </div>
+</div>
+
+<h3>Investigations</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations</code> — List investigations (paginated)</div>
+  <div class="api-body">
+    <h4>Auth</h4> Any authenticated role
+    <h4>Query Params</h4> <code>status</code>, <code>page=1</code>, <code>per_page=20</code>, <code>search</code>
+    <h4>Response 200</h4>
+    <pre><code>{ "data": [{ "id":"uuid","name":"DataBreach-2026-09","target_host":"192.168.1.50",
+  "target_os":"LINUX","status":"ACTIVE","created_by":"j.doe","created_at":"2026-09-26T10:00:00Z",
+  "evidence_count":142,"open_jobs":0 }],
+  "pagination": { "page":1,"per_page":20,"total":3 } }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations</code> — Create investigation</div>
+  <div class="api-body">
+    <h4>Auth</h4> INVESTIGATOR, LEAD_INVESTIGATOR, ADMIN
+    <h4>Request</h4>
+    <pre><code>{ "name":"DataBreach-2026-09","description":"Suspicious exfil detected",
+  "target_host":"192.168.1.50","target_os":"LINUX" }</code></pre>
+    <h4>Response 201</h4> Full investigation object
+    <h4>Errors</h4> 409 duplicate name · 422 validation
+    <h4>Side Effects</h4> audit_log entry: INVESTIGATION_CREATED
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations/:id</code> — Get full investigation detail</div>
+  <div class="api-body">
+    <h4>Response 200</h4>
+    <pre><code>{ "id":"uuid","name":"...","status":"ACTIVE","target_host":"192.168.1.50",
+  "evidence_summary": {"total":142,"by_type":{"PROCESS":30,"FILE":45,"NETWORK_CONNECTION":20,...}},
+  "last_activity":"2026-09-26T12:30:00Z",
+  "recent_jobs": [{"id":"uuid","status":"COMPLETED","fql":"INVESTIGATE processes","completed_at":"..."}] }</code></pre>
+  </div>
+</div>
+
+<h3>FQL Execution</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations/:id/fql/validate</code> — Syntax-check FQL without executing</div>
+  <div class="api-body">
+    <h4>Request</h4><pre><code>{ "fql": "INVESTIGATE processes WHERE name CONTAINS 'powershell'" }</code></pre>
+    <h4>Response 200</h4>
+    <pre><code>{ "valid":true, "ast":{"type":"INVESTIGATE","collector":"processes",
+  "where":{"field":"name","op":"CONTAINS","value":"powershell"}},
+  "estimated_collectors":["PROCESS"], "policy_preview":{"status":"ALLOWED"} }</code></pre>
+    <h4>Response 422</h4>
+    <pre><code>{ "error":{"code":"FQL_PARSE_ERROR","message":"Unexpected token at line 1, col 21",
+  "details":{"line":1,"col":21,"token":"WHERE2"}} }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations/:id/fql/execute</code> — Execute FQL query</div>
+  <div class="api-body">
+    <h4>Auth</h4> INVESTIGATOR+; network/memory collectors require LEAD_INVESTIGATOR
+    <h4>Request</h4><pre><code>{ "fql": "INVESTIGATE processes WHERE name CONTAINS 'powershell' AND user = 'SYSTEM'", "policy_id": "uuid-optional" }</code></pre>
+    <h4>Response 202 (Accepted)</h4>
+    <pre><code>{ "job_id":"job_01J8...", "fql_query_id":"uuid",
+  "collectors":["PROCESS"], "estimated_duration_sec":15,
+  "status_endpoint":"/api/v1/jobs/job_01J8.../status" }</code></pre>
+    <h4>Response 403 (Policy denied)</h4>
+    <pre><code>{ "error":{"code":"POLICY_DENIED","message":"Network capture requires case approval",
+  "details":{"required_approval_from":"LEAD_INVESTIGATOR"}} }</code></pre>
+    <h4>Side Effects</h4> Creates fql_query record, enqueues Celery job, opens WebSocket notification channel
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/jobs/:job_id/status</code> — Poll job status</div>
+  <div class="api-body">
+    <h4>Response 200</h4>
+    <pre><code>{ "job_id":"job_01J8...","status":"RUNNING","progress":{"completed":2,"total":3},
+  "collectors":{"PROCESS":"COMPLETED","FILE":"RUNNING","NETWORK":"PENDING"},
+  "items_collected_so_far":47 }</code></pre>
+  </div>
+</div>
+
+<h3>Evidence</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations/:id/evidence</code> — List evidence (paginated, filterable)</div>
+  <div class="api-body">
+    <h4>Query Params</h4> <code>type</code>, <code>from_time</code>, <code>to_time</code>, <code>search</code>, <code>page</code>, <code>per_page</code>
+    <h4>Response 200</h4>
+    <pre><code>{ "data":[{ "id":"uuid","evidence_type":"PROCESS","collected_at":"2026-09-26T10:15:00Z",
+  "data_hash":"sha256hex","data":{"pid":4567,"name":"powershell.exe","user":"SYSTEM",
+  "cmdline":"powershell -enc YWRk...","parent_pid":1234,"parent_name":"cmd.exe"},
+  "blockchain_status":"CONFIRMED","blockchain_tx":"0x..." }],
+  "pagination":{...} }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations/:id/timeline</code> — Chronological event timeline</div>
+  <div class="api-body">
+    <h4>Query Params</h4> <code>from_time</code>, <code>to_time</code>, <code>granularity=minute|hour</code>
+    <h4>Response 200</h4>
+    <pre><code>{ "timeline":[{ "timestamp":"2026-09-26T10:15:32Z","type":"PROCESS",
+  "label":"powershell.exe spawned by cmd.exe (SYSTEM)","evidence_id":"uuid","severity":"HIGH" },
+  { "timestamp":"2026-09-26T10:15:35Z","type":"FILE",
+  "label":"C:\\Temp\\dropper.exe written","evidence_id":"uuid","severity":"CRITICAL" }] }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations/:id/graph</code> — Evidence correlation graph (nodes + edges)</div>
+  <div class="api-body">
+    <h4>Response 200 (React Flow format)</h4>
+    <pre><code>{ "nodes":[{ "id":"proc_4567","type":"process","data":{"label":"powershell.exe","pid":4567} },
+  { "id":"file_abc","type":"file","data":{"label":"dropper.exe","path":"C:\\Temp\\dropper.exe"} }],
+  "edges":[{ "id":"e1","source":"proc_4567","target":"file_abc","label":"ACCESSED_FILE","type":"default" }] }</code></pre>
+  </div>
+</div>
+
+<h3>AI Intelligence</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations/:id/ai/correlate</code> — Run AI correlation on all evidence</div>
+  <div class="api-body">
+    <h4>Response 202</h4><pre><code>{ "analysis_id":"uuid","status":"RUNNING","estimated_sec":30 }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations/:id/ai/query</code> — RAG Q&A over collected evidence</div>
+  <div class="api-body">
+    <h4>Request</h4><pre><code>{ "question":"Which user account was compromised first?" }</code></pre>
+    <h4>Response 200</h4>
+    <pre><code>{ "answer":"Based on collected evidence, user 'svc_backup' (SID S-1-5-21-...) shows the earliest anomalous login at 10:12:44 UTC, 3 minutes before the suspicious process was spawned.",
+  "evidence_refs":["uuid1","uuid2"],"confidence":0.87,"model":"claude-sonnet-4-6" }</code></pre>
+  </div>
+</div>
+
+<h3>Reports</h3>
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-post">POST</span> <code>/investigations/:id/reports</code> — Generate investigation report</div>
+  <div class="api-body">
+    <h4>Request</h4><pre><code>{ "type":"FULL","title":"DataBreach-2026-09 Final Report" }</code></pre>
+    <h4>Response 202</h4><pre><code>{ "report_id":"uuid","status":"GENERATING","estimated_sec":60 }</code></pre>
+  </div>
+</div>
+
+<div class="api-block">
+  <div class="api-header"><span class="badge badge-get">GET</span> <code>/investigations/:id/reports/:report_id/download</code> — Download PDF report</div>
+  <div class="api-body">
+    <h4>Response</h4> <code>Content-Type: application/pdf</code> · Binary PDF stream
+    <h4>Auth</h4> All roles (AUDITOR gets read-only access)
+  </div>
+</div>
+</section>
+
+<!-- ============================================================ -->
+<section id="s7">
+<h2><span class="sec-num">07</span> Frontend Architecture</h2>
+
+<h3>Route Structure (Next.js App Router)</h3>
+<table>
+  <tr><th>Route</th><th>Page / Purpose</th><th>Auth</th><th>Key Components</th></tr>
+  <tr><td><code>/login</code></td><td>Login page</td><td>Public</td><td>LoginForm, JWT storage in httpOnly cookie</td></tr>
+  <tr><td><code>/</code></td><td>Redirect to /investigations</td><td>Auth</td><td>—</td></tr>
+  <tr><td><code>/investigations</code></td><td>Investigation list + "New Investigation" CTA</td><td>Auth</td><td>InvestigationCard, StatusBadge, SearchFilter</td></tr>
+  <tr><td><code>/investigations/new</code></td><td>Create investigation form</td><td>INVESTIGATOR+</td><td>InvestigationForm, TargetPicker</td></tr>
+  <tr><td><code>/investigations/[id]</code></td><td>Investigation overview: summary cards + recent activity</td><td>Auth</td><td>EvidenceSummaryCards, RecentJobsList, QuickFQL</td></tr>
+  <tr><td><code>/investigations/[id]/fql</code></td><td>FQL Editor — write + execute forensic queries</td><td>INVESTIGATOR+</td><td>FQLEditor (Monaco), PolicyPreview, JobStatusPanel, CollectorResultFeed</td></tr>
+  <tr><td><code>/investigations/[id]/evidence</code></td><td>Evidence browser — table with filters</td><td>Auth</td><td>EvidenceTable, EvidenceDetailDrawer, FilterBar, HashVerifyButton</td></tr>
+  <tr><td><code>/investigations/[id]/timeline</code></td><td>Chronological timeline visualization</td><td>Auth</td><td>D3Timeline, EventTooltip, TimeRangePicker, SeverityFilter</td></tr>
+  <tr><td><code>/investigations/[id]/graph</code></td><td>Interactive evidence correlation graph</td><td>Auth</td><td>ReactFlowGraph, NodeDetailPanel, PathHighlighter, MITRETag</td></tr>
+  <tr><td><code>/investigations/[id]/ai</code></td><td>AI Intelligence — correlate + Q&A</td><td>Auth</td><td>CorrelateButton, WhatHappenedCard, EvidenceChatBox, ConfidenceIndicator</td></tr>
+  <tr><td><code>/investigations/[id]/reports</code></td><td>Report generation + download history</td><td>Auth</td><td>ReportForm, ReportCard, DownloadButton, StatusTracker</td></tr>
+  <tr><td><code>/admin/users</code></td><td>User management</td><td>ADMIN</td><td>UserTable, InviteUserModal, RolePicker</td></tr>
+  <tr><td><code>/admin/policies</code></td><td>Policy management</td><td>ADMIN</td><td>PolicyEditor (YAML), PolicyTestModal</td></tr>
+  <tr><td><code>/admin/audit</code></td><td>Audit log viewer</td><td>ADMIN, AUDITOR</td><td>AuditTable, ActionFilter, ExportButton</td></tr>
+</table>
+
+<h3>State Management</h3>
+<pre><code>// Zustand store — global investigation state
+interface InvestigationStore {
+  currentInvestigationId: string | null;
+  activeJobIds: string[];            // Jobs being polled
+  wsConnected: boolean;
+  setCurrentInvestigation: (id: string) => void;
+  addActiveJob: (jobId: string) => void;
+  removeActiveJob: (jobId: string) => void;
+}
+
+// React Query keys
+const queryKeys = {
+  investigations: ['investigations'],
+  investigation: (id: string) => ['investigations', id],
+  evidence: (id: string, filters: EvidenceFilters) => ['evidence', id, filters],
+  timeline: (id: string, range: TimeRange) => ['timeline', id, range],
+  graph: (id: string) => ['graph', id],
+  jobStatus: (jobId: string) => ['jobs', jobId, 'status'],
+}</code></pre>
+
+<h3>FQL Editor (Monaco)</h3>
+<pre><code>// FQL Language Server features required:
+// 1. Syntax highlighting (register custom language in Monaco)
+// 2. Auto-complete: INVESTIGATE, WHERE, AND, OR, CONTAINS, IN, BETWEEN, TIMELINE FROM ... TO
+// 3. Real-time validation: debounce 500ms, call POST /fql/validate
+// 4. Policy preview panel: show ALLOWED/DENIED before execution
+// 5. Keyboard shortcut: Ctrl+Enter to execute
+
+// FQL Grammar (must match backend Lark grammar exactly):
+// STATEMENT: "INVESTIGATE" COLLECTOR_TYPE ("WHERE" CONDITION ("AND"|"OR" CONDITION)*)?
+//          | "TIMELINE" "FROM" DATETIME "TO" DATETIME
+// COLLECTOR_TYPE: "processes" | "files" | "network" | "users" | "events"
+// CONDITION: FIELD OP VALUE
+// OP: "=" | "!=" | "CONTAINS" | "IN" | ">" | "<" | "BETWEEN"
+// Examples:
+//   INVESTIGATE processes WHERE name CONTAINS "powershell" AND user = "SYSTEM"
+//   INVESTIGATE files WHERE path CONTAINS "temp" AND modified_after "2026-01-01"
+//   INVESTIGATE network WHERE destination_port IN [443, 8080, 4444]
+//   INVESTIGATE users WHERE last_login > "2026-09-01"
+//   INVESTIGATE events WHERE type = "login_failure" AND count > 5
+//   TIMELINE FROM "2026-09-26T00:00" TO "2026-09-26T23:59"</code></pre>
+
+<h3>Key TypeScript Types</h3>
+<pre><code>type UserRole = 'ADMIN' | 'LEAD_INVESTIGATOR' | 'INVESTIGATOR' | 'AUDITOR';
+type InvestigationStatus = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED' | 'SUSPENDED';
+type EvidenceType = 'PROCESS' | 'FILE' | 'NETWORK_CONNECTION' | 'USER_ACCOUNT' | 'SYSTEM_EVENT' | 'TIMELINE_ENTRY' | 'PCAP_FILE' | 'LOG_ENTRY';
+type CollectorType = 'PROCESS' | 'FILE' | 'NETWORK' | 'USER' | 'EVENT' | 'TIMELINE';
+type JobStatus = 'PENDING' | 'VALIDATED' | 'POLICY_DENIED' | 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'PARTIAL';
+
+interface EvidenceItem {
+  id: string; evidence_type: EvidenceType; collected_at: string;
+  data: ProcessEvidence | FileEvidence | NetworkEvidence | UserEvidence | EventEvidence;
+  data_hash: string; blockchain_status: 'NOT_SUBMITTED' | 'PENDING' | 'CONFIRMED' | 'FAILED';
+  blockchain_tx?: string;
+}
+
+interface ProcessEvidence {
+  pid: number; name: string; cmdline: string; user: string;
+  parent_pid: number; parent_name: string; hash_sha256?: string;
+  started_at: string; memory_mb?: number; cpu_percent?: number;
+}
+
+interface GraphData {
+  nodes: GraphNode[]; edges: GraphEdge[];
+}
+interface GraphNode {
+  id: string; type: 'process' | 'file' | 'network' | 'user' | 'event';
+  data: { label: string; [key: string]: unknown }; position?: { x: number; y: number };
+}
+interface GraphEdge {
+  id: string; source: string; target: string; label: string;
+}</code></pre>
+
+<h3>WebSocket Integration</h3>
+<pre><code>// Connect on investigation page mount, disconnect on unmount
+const ws = new WebSocket(`wss://forgex.local/ws?token=${accessToken}&investigation_id=${id}`);
+
+// Incoming message types:
+// { type: 'JOB_STATUS', job_id: '...', status: 'RUNNING', progress: { completed: 1, total: 3 } }
+// { type: 'JOB_COMPLETE', job_id: '...', evidence_count: 47 }
+// { type: 'JOB_FAILED', job_id: '...', error: 'Collector timeout' }
+// { type: 'AI_COMPLETE', analysis_id: '...' }
+
+// On JOB_COMPLETE → invalidate evidence query, show toast notification</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="s8">
+<h2><span class="sec-num">08</span> Backend Architecture</h2>
+
+<h3>Module Structure</h3>
+<pre><code>forgex_backend/
+├── main.py                    # FastAPI app factory, lifespan hooks
+├── config.py                  # Settings (pydantic-settings, .env)
+├── api/                       # API layer — routers only, no business logic
+│   ├── v1/
+│   │   ├── auth.py
+│   │   ├── investigations.py
+│   │   ├── fql.py
+│   │   ├── evidence.py
+│   │   ├── ai_intelligence.py
+│   │   ├── reports.py
+│   │   ├── jobs.py
+│   │   └── admin.py
+├── core/                      # Cross-cutting concerns
+│   ├── auth.py                # JWT creation/validation, RBAC decorator
+│   ├── audit.py               # Audit log writer
+│   ├── exceptions.py          # Domain exceptions → HTTP responses
+│   └── websocket.py           # WS connection manager
+├── services/                  # Business logic layer
+│   ├── investigation_service.py
+│   ├── fql_service.py         # Parser + policy + orchestrator coordination
+│   ├── evidence_service.py    # Hash, store, embed
+│   ├── ai_service.py          # LLM calls, RAG, correlation
+│   ├── report_service.py      # PDF generation
+│   └── blockchain_service.py  # Evidence anchoring
+├── fql/                       # FQL subsystem
+│   ├── grammar.lark            # Lark EBNF grammar file
+│   ├── parser.py              # FQL → AST
+│   ├── ast_types.py           # Dataclasses for AST nodes
+│   └── to_collector_params.py # AST → collector params dict
+├── policy/
+│   ├── engine.py              # Policy evaluation
+│   ├── loader.py              # Load policies from DB/cache
+│   └── models.py              # Policy dataclasses
+├── collectors/                # Forensic collection modules
+│   ├── base.py                # Abstract BaseCollector
+│   ├── process_collector.py   # psutil-based
+│   ├── file_collector.py      # os.walk based
+│   ├── network_collector.py   # PCAP/Zeek
+│   ├── user_collector.py      # pwd/grp (Linux), SAM (Windows)
+│   ├── event_collector.py     # evtx / syslog / auditd
+│   └── timeline_builder.py    # Merges all evidence into timeline
+├── workers/                   # Celery tasks
+│   ├── celery_app.py
+│   ├── collector_tasks.py
+│   ├── ai_tasks.py
+│   └── report_tasks.py
+├── db/
+│   ├── session.py             # SQLAlchemy async engine
+│   ├── models.py              # ORM models (match schema above)
+│   └── neo4j_client.py        # Neo4j async driver
+├── repositories/              # Data access layer
+│   ├── investigation_repo.py
+│   ├── evidence_repo.py
+│   ├── user_repo.py
+│   └── audit_repo.py
+└── schemas/                   # Pydantic request/response models
+    ├── auth.py
+    ├── investigation.py
+    ├── fql.py
+    ├── evidence.py
+    └── ai.py</code></pre>
+
+<h3>FQL Grammar (Lark EBNF)</h3>
+<pre><code>// file: forgex_backend/fql/grammar.lark
+start: statement
+
+statement: investigate_stmt | timeline_stmt
+
+investigate_stmt: "INVESTIGATE" COLLECTOR ("WHERE" condition (BOOL_OP condition)*)?
+timeline_stmt: "TIMELINE" "FROM" DATETIME "TO" DATETIME
+
+COLLECTOR: "processes" | "files" | "network" | "users" | "events"
+BOOL_OP: "AND" | "OR"
+
+condition: FIELD OP value
+OP: "=" | "!=" | "CONTAINS" | "NOT CONTAINS" | "IN" | "NOT IN" | ">" | "<" | ">=" | "<=" | "BETWEEN"
+value: STRING | NUMBER | list_val | DATETIME
+list_val: "[" value ("," value)* "]"
+
+FIELD: /[a-zA-Z_][a-zA-Z0-9_.]*/
+STRING: "\"" /[^"]*/ "\"" | "'" /[^']*/ "'"
+NUMBER: /[0-9]+(\.[0-9]+)?/
+DATETIME: /\"[0-9]{4}-[0-9]{2}-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?)?(\s[0-9]{4}-[0-9]{2}-[0-9]{2})?\"/ 
+
+%ignore /\s+/
+%ignore /\/\/.*/</code></pre>
+
+<h3>Policy Engine Rules (YAML format stored in DB)</h3>
+<pre><code>name: default-investigation-policy
+allowed_collectors:
+  - processes
+  - files
+  - users
+  - events
+  - timeline
+restricted_collectors:
+  network:
+    required_role: LEAD_INVESTIGATOR
+    requires_case_status: ACTIVE
+    max_capture_duration_sec: 300
+    log_mandatory: true
+field_restrictions:
+  files:
+    excluded_paths:
+      - "/proc"
+      - "/sys"
+      - "C:\\Windows\\System32"  # requires elevated permission flag
+    max_depth: 8
+rate_limits:
+  max_executions_per_hour_per_investigator: 20
+  max_concurrent_jobs: 3</code></pre>
+
+<h3>Layer Responsibilities — Business Logic Rules</h3>
+<table>
+  <tr><th>Layer</th><th>What lives here</th><th>What does NOT belong here</th></tr>
+  <tr><td>API Router</td><td>HTTP validation (Pydantic), auth middleware, response serialization</td><td>Business logic, DB calls</td></tr>
+  <tr><td>Service</td><td>Orchestration: call parser → call policy → enqueue job → call repo to save</td><td>Raw SQL, HTTP request parsing</td></tr>
+  <tr><td>Repository</td><td>SQLAlchemy queries, Neo4j Cypher execution, caching logic</td><td>Business decisions</td></tr>
+  <tr><td>Collector</td><td>OS-level forensic data collection, raw data returned as dict</td><td>Hashing, storing — pass raw data back to service</td></tr>
+  <tr><td>Worker (Celery)</td><td>Job coordination, timeout handling, retries, calling collectors</td><td>Business logic beyond what's in services</td></tr>
+</table>
+
+<h3>Async Operations</h3>
+<ul>
+  <li>FQL execution → always async (Celery job). API returns 202 immediately with job_id.</li>
+  <li>AI correlation → always async (Celery job, up to 60s).</li>
+  <li>Report generation → always async (Celery job, up to 120s).</li>
+  <li>Blockchain anchoring → async fire-and-forget per evidence item, best-effort.</li>
+  <li>pgvector embedding → background task after evidence saved.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="s9">
+<h2><span class="sec-num">09</span> AI Architecture</h2>
+
+<h3>Provider Abstraction</h3>
+<pre><code>class LLMProvider(Protocol):
+    async def complete(self, messages: list[Message], response_format: type[BaseModel]) -> BaseModel: ...
+
+class AnthropicProvider:
+    model = "claude-sonnet-4-6"
+    async def complete(self, messages, response_format): ...
+
+class OpenAIProvider:
+    model = "gpt-4o"
+    async def complete(self, messages, response_format): ...
+
+# In config:
+PRIMARY_LLM = AnthropicProvider()
+FALLBACK_LLM = OpenAIProvider()
+
+async def llm_complete(messages, response_format):
+    try:
+        return await PRIMARY_LLM.complete(messages, response_format)
+    except (TimeoutError, RateLimitError):
+        await asyncio.sleep(2)
+        return await FALLBACK_LLM.complete(messages, response_format)  # one fallback</code></pre>
+
+<h3>Prompt Architecture</h3>
+<h4>Correlation Prompt (What Happened?)</h4>
+<pre><code>SYSTEM = """You are a digital forensics AI assistant. You analyze collected forensic evidence
+and produce structured incident reconstructions. You ONLY reason about evidence explicitly
+provided. You do NOT speculate beyond the data. Every claim MUST cite an evidence_id.
+Output ONLY valid JSON matching the schema below. No prose outside the JSON."""
+
+USER = """Investigation: {investigation_name}
+Target: {target_host} ({target_os})
+
+EVIDENCE:
+{evidence_json}  ← top 50 items ranked by relevance (RAG)
+
+CORRELATION GRAPH SUMMARY:
+{graph_summary}
+
+Produce a CorrelationResult JSON:
+{
+  "what_happened": "string — concise narrative of the incident",
+  "attack_stages": [{"stage":"string","description":"string","evidence_ids":["uuid"]}],
+  "suspicious_indicators": [{"indicator":"string","severity":"HIGH|MED|LOW","evidence_ids":["uuid"]}],
+  "mitre_techniques": [{"technique_id":"T1059.001","name":"PowerShell","evidence_ids":["uuid"]}],
+  "confidence": 0.0-1.0,
+  "gaps": ["string — what evidence is missing to complete the picture"]
+}"""</code></pre>
+
+<h4>RAG Q&A Prompt</h4>
+<pre><code">SYSTEM = """You are a forensic evidence analyst. You answer investigator questions strictly
+based on the collected evidence provided. Cite evidence_ids for every factual claim.
+If the evidence does not contain the answer, say so explicitly — do not guess."""
+
+USER = """Question: {investigator_question}
+
+Relevant Evidence (retrieved via semantic search):
+{rag_evidence_chunks}
+
+Answer in JSON: {"answer": "string", "evidence_refs": ["uuid"], "confidence": 0.0-1.0,
+"caveat": "string or null"}"</code></pre>
+
+<h3>RAG Pipeline</h3>
+<pre><code>async def retrieve_relevant_evidence(query: str, investigation_id: str, top_k: int = 20) -> list[EvidenceItem]:
+    # 1. Embed the query
+    query_embedding = await embed_text(query)  # text-embedding-3-small, 1536 dims
+    
+    # 2. Vector similarity search in pgvector (cosine distance)
+    sql = """
+    SELECT ei.*, 1 - (ee.embedding <=> $1) AS similarity
+    FROM evidence_embeddings ee
+    JOIN evidence_items ei ON ei.id = ee.evidence_id
+    WHERE ei.investigation_id = $2
+    ORDER BY similarity DESC
+    LIMIT $3
+    """
+    results = await db.fetch(sql, query_embedding, investigation_id, top_k)
+    
+    # 3. Filter by similarity threshold (> 0.3)
+    return [r for r in results if r.similarity > 0.3]</code></pre>
+
+<h3>Evidence Embedding Strategy</h3>
+<p>Each evidence item is converted to a human-readable text representation for embedding:</p>
+<pre><code>def evidence_to_text(item: EvidenceItem) -> str:
+    if item.evidence_type == "PROCESS":
+        d = item.data
+        return f"Process '{d['name']}' (PID {d['pid']}) run by user '{d['user']}', command: {d['cmdline']}, parent: '{d['parent_name']}' at {item.collected_at}"
+    elif item.evidence_type == "FILE":
+        d = item.data
+        return f"File '{d['path']}' (size {d['size']} bytes), SHA256: {d.get('hash_sha256','unknown')}, modified: {d.get('modified_at')}"
+    elif item.evidence_type == "NETWORK_CONNECTION":
+        d = item.data
+        return f"Network connection from {d['src_ip']}:{d['src_port']} to {d['dst_ip']}:{d['dst_port']} ({d['protocol']}) at {item.collected_at}"
+    # ... etc
+    </code></pre>
+
+<h3>Hallucination Controls</h3>
+<ul>
+  <li>Output validated against strict Pydantic JSON schema before storage. If invalid → discard result, return error to user.</li>
+  <li>Every claim in correlation result includes <code>evidence_ids</code>. Frontend verifies IDs exist in evidence table before displaying.</li>
+  <li>System prompt explicitly forbids speculation beyond provided evidence.</li>
+  <li>Confidence &lt; 0.4 triggers "LOW CONFIDENCE" warning banner in UI.</li>
+  <li>Prompt injection defense: evidence content is escaped and wrapped in XML tags <code>&lt;evidence&gt;...&lt;/evidence&gt;</code>; any instruction-like content inside is neutralized.</li>
+</ul>
+
+<h3>Blockchain Evidence Anchoring</h3>
+<pre><code>async def anchor_evidence_hash(evidence_id: str, data_hash: str) -> Optional[str]:
+    """Submit evidence hash to Ethereum Sepolia testnet for immutable proof."""
+    # 1. Build Ethereum transaction with data = keccak256(evidence_id + data_hash + timestamp)
+    # 2. Sign with FORGE-X wallet private key (never exposed to users)
+    # 3. Submit to Sepolia via web3.py
+    # 4. Store tx_hash in evidence_items.blockchain_tx
+    # 5. Background: poll for confirmation (10 blocks) → update blockchain_status to CONFIRMED
+    
+    payload = keccak256(f"{evidence_id}:{data_hash}:{datetime.utcnow().isoformat()}")
+    tx_hash = await w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    return tx_hash.hex()</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="s10">
+<h2><span class="sec-num">10</span> Security Architecture</h2>
+
+<table>
+  <tr><th>Threat</th><th>Vector</th><th>Mitigation</th></tr>
+  <tr><td>Authentication bypass</td><td>Invalid/expired JWT accepted</td><td>Validate signature + expiry on every request. Revoke tokens by storing jti in Redis deny-list on logout.</td></tr>
+  <tr><td>IDOR</td><td>GET /investigations/other-users-id</td><td>Every query scopes to <code>created_by = current_user.id</code> OR user has LEAD/ADMIN role. No raw UUID lookup without ownership check.</td></tr>
+  <tr><td>Broken RBAC</td><td>INVESTIGATOR runs network capture (LEAD required)</td><td>Policy engine enforced server-side. Role check on every collector type. Test: unit test all role/collector combinations.</td></tr>
+  <tr><td>FQL Injection</td><td>Malicious FQL trying to exec OS commands</td><td>FQL parser is grammar-based (Lark). If it's not valid grammar, it's rejected. FQL→collector params are typed dicts — no shell interpolation, no eval().</td></tr>
+  <tr><td>Path traversal in file collector</td><td>FQL: <code>INVESTIGATE files WHERE path = "/etc/shadow"</code></td><td>Policy engine has excluded_paths list. File collector validates all resolved paths are within allowed prefixes before reading.</td></tr>
+  <tr><td>SSRF</td><td>target_host set to internal metadata URL</td><td>Validate target_host is a legitimate RFC-1918 or DNS name. Block AWS metadata IPs (169.254.x.x), loopback, and non-routable ranges unless explicitly whitelisted.</td></tr>
+  <tr><td>Prompt Injection</td><td>Evidence payload contains malicious instructions to LLM</td><td>Evidence content is XML-escaped and wrapped in <code>&lt;evidence&gt;</code> tags with explicit system instructions that treat inner content as data only.</td></tr>
+  <tr><td>Evidence tampering</td><td>DB admin modifies stored evidence</td><td>SHA-256 hash stored at collection time. Frontend verifies hash on display. Blockchain anchor provides external immutability proof.</td></tr>
+  <tr><td>Secret leakage</td><td>LLM API keys in frontend or logs</td><td>API keys stored only in backend .env (Docker secrets in production). Never returned in API responses. Audit logs scrubbed of secrets.</td></tr>
+  <tr><td>API abuse / DoS</td><td>Rapid FQL execution floods collectors</td><td>Rate limiting: 20 FQL executions/hour/investigator (Redis counter). Max 3 concurrent jobs per investigation. Nginx rate limits: 100 req/min/IP.</td></tr>
+  <tr><td>XSS</td><td>Investigator name/evidence data rendered as HTML</td><td>Next.js escapes by default. Evidence data always rendered as text, never dangerouslySetInnerHTML. CSP header: default-src 'self'.</td></tr>
+  <tr><td>CSRF</td><td>Cross-site form submission</td><td>JWT in httpOnly cookies + double-submit CSRF token for state-changing requests. CORS restricted to known origin.</td></tr>
+  <tr><td>Unsafe file upload</td><td>PCAP files with malicious content</td><td>PCAP files stored by hash-based filename in isolated directory. Never executed. Zeek processes in sandboxed subprocess with timeout.</td></tr>
+  <tr><td>Sensitive data in logs</td><td>Evidence data or JWT in app logs</td><td>Structured logging with field masking. Log level INFO in production — no DEBUG (avoids logging request bodies).</td></tr>
+  <tr><td>Collector privilege escalation</td><td>Collector runs as root and is abused</td><td>Collectors run as a dedicated <code>forgex-collector</code> user with minimal Linux capabilities (CAP_NET_RAW for PCAP only, dropped after use). No setuid.</td></tr>
+</table>
+
+<h3>Security Headers (Nginx)</h3>
+<pre><code>add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'" always;
+add_header X-Frame-Options "DENY" always;
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "no-referrer" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="s11">
+<h2><span class="sec-num">11</span> Scalability Plan</h2>
+
+<h3>Current Limits (MVP — Single Docker Compose)</h3>
+<table>
+  <tr><th>Dimension</th><th>MVP Capacity</th><th>Bottleneck</th><th>Scaling Path</th></tr>
+  <tr><td>Concurrent investigations</td><td>~10 active</td><td>Neo4j community (single writer)</td><td>Neo4j Enterprise or partition by investigation</td></tr>
+  <tr><td>Evidence items</td><td>~500K rows</td><td>pgvector index rebuild</td><td>TimescaleDB partitioning by collected_at</td></tr>
+  <tr><td>Concurrent Celery workers</td><td>4 (default)</td><td>Memory / CPU on host</td><td>Add worker nodes; horizontal Celery scale</td></tr>
+  <tr><td>LLM throughput</td><td>~5 concurrent AI jobs</td><td>API rate limits (Anthropic/OpenAI)</td><td>Request queue + retry with backoff; multi-key pool</td></tr>
+  <tr><td>File storage (PCAP)</td><td>Local disk</td><td>Disk size</td><td>MinIO / S3-compatible object storage</td></tr>
+  <tr><td>WebSocket connections</td><td>~50</td><td>Single FastAPI instance</td><td>Redis pub/sub fan-out to multiple instances</td></tr>
+</table>
+
+<h3>Caching Strategy</h3>
+<ul>
+  <li><strong>Policies:</strong> Cached in Redis for 60s (TTL). Invalidated on policy update.</li>
+  <li><strong>Investigation summary stats:</strong> Cached 30s in Redis. Invalidated on new evidence.</li>
+  <li><strong>Evidence graph:</strong> Cached in Redis 5min per investigation. Invalidated on new evidence.</li>
+  <li><strong>LLM responses:</strong> NOT cached — always re-generate on request (evidence may have changed).</li>
+  <li><strong>Report PDFs:</strong> Stored permanently in file store; link served from DB.</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="s12">
+<h2><span class="sec-num">12</span> Testing Strategy</h2>
+
+<table>
+  <tr><th>Test Type</th><th>Tool</th><th>Coverage Targets</th><th>Priority</th></tr>
+  <tr><td>Unit — FQL Parser</td><td>pytest</td><td>All valid statements; all error cases with correct line/col</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Unit — Policy Engine</td><td>pytest</td><td>All role/collector combinations; rate limit logic</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Unit — Evidence Service</td><td>pytest</td><td>SHA-256 hash correctness; UNIQUE constraint enforcement</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Unit — Collectors</td><td>pytest + mocks</td><td>Mocked OS calls; correct data schema returned</td><td>🟡 HIGH</td></tr>
+  <tr><td>Unit — AI Output Validation</td><td>pytest</td><td>Valid JSON → accepted; invalid JSON → discarded; hallucination of fake IDs → caught</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Integration — API</td><td>pytest + httpx</td><td>All endpoints; auth enforcement; RBAC; error responses</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Integration — DB</td><td>pytest + test DB</td><td>Evidence immutability; audit log writes; cascade deletes</td><td>🟡 HIGH</td></tr>
+  <tr><td>Integration — FQL → Evidence</td><td>pytest</td><td>End-to-end: FQL → policy → collector → evidence stored correctly</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Security — RBAC</td><td>pytest</td><td>Every endpoint with every role combination</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>Security — FQL Injection</td><td>pytest</td><td>Malicious FQL inputs; path traversal attempts; oversized inputs</td><td>🔴 CRITICAL</td></tr>
+  <tr><td>E2E — Core Flows</td><td>Playwright</td><td>Login → create investigation → write FQL → view evidence → view graph</td><td>🟡 HIGH</td></tr>
+  <tr><td>Frontend — Components</td><td>Vitest + Testing Library</td><td>FQLEditor, EvidenceTable, Timeline, Graph</td><td>🟢 MED</td></tr>
+  <tr><td>Performance</td><td>Locust</td><td>100 concurrent users; FQL execution p95 &lt; 30s</td><td>🟢 MED</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s13">
+<h2><span class="sec-num">13</span> MVP Scope</h2>
+
+<div class="success-box">
+  <strong>MVP Definition:</strong> A running FORGE-X instance that can accept FQL queries, collect forensic data from a local Linux/Windows system, store evidence with hashes, correlate via Neo4j, provide LLM-powered "What Happened?" output, display an interactive timeline and graph, and generate a PDF report. All in a single <code>docker compose up</code>.
+</div>
+
+<h3>MVP Feature Set</h3>
+<table>
+  <tr><th>#</th><th>Feature</th><th>In MVP</th></tr>
+  <tr><td>1</td><td>JWT auth + 4 roles</td><td>✅</td></tr>
+  <tr><td>2</td><td>FQL editor (Monaco) with syntax highlighting</td><td>✅</td></tr>
+  <tr><td>3</td><td>FQL parser (processes, files, users, events, timeline)</td><td>✅</td></tr>
+  <tr><td>4</td><td>Policy engine (YAML rules, RBAC on collectors)</td><td>✅</td></tr>
+  <tr><td>5</td><td>Process collector (psutil, cross-platform)</td><td>✅</td></tr>
+  <tr><td>6</td><td>File collector (os.walk, metadata + hash)</td><td>✅</td></tr>
+  <tr><td>7</td><td>User account collector</td><td>✅</td></tr>
+  <tr><td>8</td><td>System event collector (Linux syslog / Windows evtx)</td><td>✅</td></tr>
+  <tr><td>9</td><td>Network collector — active connections (psutil)</td><td>✅</td></tr>
+  <tr><td>10</td><td>PCAP capture (requires LEAD role)</td><td>⚡ Demo only</td></tr>
+  <tr><td>11</td><td>SHA-256 hashing of all evidence</td><td>✅</td></tr>
+  <tr><td>12</td><td>PostgreSQL evidence storage</td><td>✅</td></tr>
+  <tr><td>13</td><td>Neo4j correlation graph</td><td>✅</td></tr>
+  <tr><td>14</td><td>D3 timeline visualization</td><td>✅</td></tr>
+  <tr><td>15</td><td>React Flow evidence graph</td><td>✅</td></tr>
+  <tr><td>16</td><td>LLM "What Happened?" correlation</td><td>✅</td></tr>
+  <tr><td>17</td><td>RAG evidence Q&A</td><td>✅</td></tr>
+  <tr><td>18</td><td>PDF report generation</td><td>✅</td></tr>
+  <tr><td>19</td><td>Full audit log</td><td>✅</td></tr>
+  <tr><td>20</td><td>Blockchain hash anchoring (Sepolia)</td><td>⚡ Demo only</td></tr>
+  <tr><td>21</td><td>MITRE ATT&CK mapping in AI output</td><td>✅ (in LLM prompt)</td></tr>
+  <tr><td>22</td><td>WebSocket live job status</td><td>✅</td></tr>
+  <tr><td>23</td><td>Docker Compose single-command deploy</td><td>✅</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s14">
+<h2><span class="sec-num">14</span> Implementation Roadmap</h2>
+
+<h3>Phase A — Foundation (Days 1-2)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Owner</th><th>Acceptance Criteria</th></tr>
+  <tr><td>A1</td><td>Docker Compose file with FastAPI, Postgres, Neo4j, Redis, Nginx</td><td>OpenCode</td><td><code>docker compose up</code> → all services healthy</td></tr>
+  <tr><td>A2</td><td>PostgreSQL schema migrations (Alembic)</td><td>OpenCode</td><td>All tables created; indexes in place</td></tr>
+  <tr><td>A3</td><td>Neo4j schema + constraints + test connection</td><td>OpenCode</td><td>Neo4j reachable; constraints applied</td></tr>
+  <tr><td>A4</td><td>FastAPI app skeleton with CORS, middleware, health endpoint</td><td>OpenCode</td><td>GET /health → 200</td></tr>
+  <tr><td>A5</td><td>Next.js project with Tailwind, shadcn/ui, auth skeleton</td><td>Cursor</td><td>Next.js dev server runs; login route visible</td></tr>
+</table>
+
+<h3>Phase B — Backend Core (Days 2-4)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Dependencies</th><th>Acceptance Criteria</th></tr>
+  <tr><td>B1</td><td>Auth service: JWT issuance, refresh, RBAC middleware</td><td>A2</td><td>POST /auth/login returns valid JWT; middleware blocks unauthenticated requests</td></tr>
+  <tr><td>B2</td><td>FQL parser (Lark grammar)</td><td>A4</td><td>All valid FQL examples parsed; invalid FQL returns line/col error</td></tr>
+  <tr><td>B3</td><td>Policy engine (YAML loader + evaluator)</td><td>A2, B2</td><td>Role/collector matrix passes all unit tests</td></tr>
+  <tr><td>B4</td><td>Process collector (psutil)</td><td>A4</td><td>Returns list of running processes with pid, name, user, cmdline, hash</td></tr>
+  <tr><td>B5</td><td>File collector</td><td>A4</td><td>Returns file metadata + SHA-256 for given path</td></tr>
+  <tr><td>B6</td><td>User + Event collectors</td><td>A4</td><td>Returns user accounts and last N system events</td></tr>
+  <tr><td>B7</td><td>Network collector (active connections via psutil)</td><td>A4</td><td>Returns active TCP/UDP connections with process association</td></tr>
+  <tr><td>B8</td><td>Evidence service (hash + PostgreSQL + Neo4j)</td><td>A2, A3</td><td>Evidence item saved; hash verified; Neo4j node created</td></tr>
+  <tr><td>B9</td><td>Forensic Orchestrator + Celery workers</td><td>B2,B3,B4-B7,B8</td><td>FQL execute → job queued → collectors run → evidence saved</td></tr>
+  <tr><td>B10</td><td>Audit logger (all API mutations)</td><td>A2</td><td>Every state-changing call produces audit_log row</td></tr>
+  <tr><td>B11</td><td>WebSocket job status hub</td><td>B9</td><td>Browser receives JOB_COMPLETE within 2s of Celery task completion</td></tr>
+</table>
+
+<h3>Phase C — Frontend Core (Days 3-5)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Dependencies</th><th>Acceptance Criteria</th></tr>
+  <tr><td>C1</td><td>Auth: login page, JWT storage, protected routes</td><td>B1, A5</td><td>Login → redirect to /investigations; logout clears token</td></tr>
+  <tr><td>C2</td><td>Investigation list + create flow</td><td>C1</td><td>Create investigation → appears in list</td></tr>
+  <tr><td>C3</td><td>FQL Editor (Monaco) with syntax highlight + validation</td><td>C1, B2</td><td>Invalid FQL shows error with line number; valid FQL shows policy preview</td></tr>
+  <tr><td>C4</td><td>FQL execute → job status → evidence feed (WebSocket)</td><td>C3, B9, B11</td><td>Execute FQL → spinner → "47 evidence items collected" toast</td></tr>
+  <tr><td>C5</td><td>Evidence browser table with filters</td><td>C4</td><td>Table shows all evidence; filter by type/time works; hash visible</td></tr>
+  <tr><td>C6</td><td>D3 Timeline visualization</td><td>C4</td><td>Chronological events visible; hover shows detail</td></tr>
+  <tr><td>C7</td><td>React Flow evidence graph</td><td>C4</td><td>Nodes and edges render; click node shows detail; pan/zoom works</td></tr>
+</table>
+
+<h3>Phase D — AI + Reports (Days 5-7)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Dependencies</th><th>Acceptance Criteria</th></tr>
+  <tr><td>D1</td><td>pgvector embedding pipeline (evidence indexing)</td><td>B8</td><td>Evidence items embedded after collection; similarity search returns relevant results</td></tr>
+  <tr><td>D2</td><td>LLM correlation service (What Happened?)</td><td>D1</td><td>AI correlation returns structured JSON; confidence score displayed; evidence refs verified</td></tr>
+  <tr><td>D3</td><td>RAG Q&A endpoint + UI</td><td>D1</td><td>Ask "which user was compromised?" → answer cites evidence_ids</td></tr>
+  <tr><td>D4</td><td>PDF report generation (WeasyPrint)</td><td>D2</td><td>Generate report → downloadable PDF with timeline, evidence table, AI narrative</td></tr>
+  <tr><td>D5</td><td>Blockchain anchoring (Sepolia)</td><td>B8</td><td>evidence_items.blockchain_tx populated; Etherscan link shows tx with correct hash</td></tr>
+</table>
+
+<h3>Phase E — Security + Testing (Days 7-8)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Acceptance Criteria</th></tr>
+  <tr><td>E1</td><td>RBAC enforcement tests (all role/endpoint combinations)</td><td>Zero unauthorized access in test matrix</td></tr>
+  <tr><td>E2</td><td>FQL injection tests</td><td>All malicious inputs rejected by parser; no shell execution</td></tr>
+  <tr><td>E3</td><td>Evidence integrity test (hash verification)</td><td>Modified evidence detected; UI shows "TAMPERED" badge</td></tr>
+  <tr><td>E4</td><td>Rate limiting test</td><td>21st FQL execution returns 429</td></tr>
+  <tr><td>E5</td><td>Security headers audit (Codex)</td><td>All headers present; CSP passes; no secrets in responses</td></tr>
+</table>
+
+<h3>Phase F — Demo Readiness (Day 8-9)</h3>
+<table>
+  <tr><th>ID</th><th>Task</th><th>Acceptance Criteria</th></tr>
+  <tr><td>F1</td><td>Seeded demo investigation with realistic evidence</td><td>Demo loads in 2s; shows populated timeline and graph</td></tr>
+  <tr><td>F2</td><td>FORGE-X Logo / branding in UI</td><td>Professional appearance; no placeholder text</td></tr>
+  <tr><td>F3</td><td>docker compose up → fully working system in &lt;2 min</td><td>Single command demo for SIH judges</td></tr>
+  <tr><td>F4</td><td>README with architecture overview + demo script</td><td>Judges can run and understand the demo independently</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s15">
+<h2><span class="sec-num">15</span> Cursor Frontend Handoff</h2>
+
+<div class="info-box">Cursor: Implement the Next.js frontend using this specification exactly. Do not invent API contracts — all endpoints are defined in §06.</div>
+
+<h4>Stack</h4>
+<pre><code>Next.js 15 (App Router) · TypeScript 5.x · Tailwind CSS 3.x · shadcn/ui
+Zustand (global state) · @tanstack/react-query v5 (server state)
+Monaco Editor (FQL editing) · React Flow v12 (evidence graph) · D3.js v7 (timeline)
+Recharts (evidence summary charts) · react-pdf (report preview)
+axios (API client, interceptors for JWT refresh) · date-fns (timestamps)</code></pre>
+
+<h4>Environment Variables</h4>
+<pre><code>NEXT_PUBLIC_API_URL=https://forgex.local/api/v1
+NEXT_PUBLIC_WS_URL=wss://forgex.local/ws</code></pre>
+
+<h4>Auth Pattern</h4>
+<ul>
+  <li>Access token: store in Zustand memory (NOT localStorage). Lost on page refresh → handled by refresh token.</li>
+  <li>Refresh token: httpOnly cookie set by backend (not accessible to JS).</li>
+  <li>On 401 from any API call → call POST /auth/refresh → retry original request. If refresh fails → redirect to /login.</li>
+  <li>All protected routes: use Next.js middleware to check for valid session.</li>
+</ul>
+
+<h4>Critical UX Requirements</h4>
+<ul>
+  <li>FQL Editor must show real-time validation (debounce 500ms). Show policy preview before execution.</li>
+  <li>Job execution must use WebSocket for live status — do NOT poll every second.</li>
+  <li>Evidence table must support virtual scrolling (10K+ rows possible). Use TanStack Virtual.</li>
+  <li>Graph view: nodes color-coded by type (process=blue, file=green, network=orange, user=purple, event=red).</li>
+  <li>Timeline: click event → highlight corresponding node in evidence table and graph (cross-highlight).</li>
+  <li>Hash value display: show first 12 chars + copy button. Full hash in tooltip.</li>
+  <li>Blockchain status: show colored badge (grey=not submitted, yellow=pending, green=confirmed).</li>
+  <li>All loading states: use skeleton cards, not spinners (more professional for forensic tool).</li>
+  <li>Empty states: always explain why empty and suggest next action (e.g., "No evidence yet — write a FQL query to start collecting").</li>
+  <li>Accessibility: all interactive elements keyboard-navigable; WCAG 2.1 AA minimum.</li>
+</ul>
+
+<h4>Acceptance Criteria for Cursor</h4>
+<ul class="checklist">
+  <li>Login flow works end-to-end with real backend JWT</li>
+  <li>FQL Editor has syntax highlighting for the FQL grammar defined in §07</li>
+  <li>FQL validation shows line/column error correctly</li>
+  <li>Execute FQL → WebSocket updates job status in real time</li>
+  <li>Evidence table loads 1000+ items without freezing (virtual scroll)</li>
+  <li>Timeline renders all events chronologically with severity color coding</li>
+  <li>Graph shows USER→PROCESS→FILE→NETWORK→EVENT relationships with correct node types</li>
+  <li>AI "What Happened?" result shows confidence, evidence refs, and MITRE tags</li>
+  <li>Report download works (PDF binary stream from API)</li>
+  <li>All TypeScript types in §07 used — no <code>any</code> except in third-party adapter code</li>
+  <li>Responsive: usable on 1280px minimum width (forensic analyst desktop)</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="s16">
+<h2><span class="sec-num">16</span> OpenCode Backend Handoff</h2>
+
+<div class="info-box">OpenCode: Implement the Python FastAPI backend using this specification exactly. Match all API response shapes defined in §06 precisely — Cursor will type-check against them.</div>
+
+<h4>Stack</h4>
+<pre><code>Python 3.12 · FastAPI 0.115 · SQLAlchemy 2.0 (async) · Alembic · asyncpg
+Celery 5.4 · Redis (celery broker) · neo4j (official async driver)
+Lark 1.2 (FQL parser) · psutil · pyshark (PCAP) · python-evtx
+weasyprint (PDF) · web3.py (blockchain) · anthropic SDK · openai SDK
+passlib[bcrypt] · PyJWT · pydantic-settings · structlog</code></pre>
+
+<h4>Critical Implementation Rules</h4>
+<ul>
+  <li>FQL parser MUST use the Lark grammar in §08 exactly. Do not write a custom regex parser.</li>
+  <li>Policy engine MUST be evaluated BEFORE any collector is called. Policy check cannot be bypassed.</li>
+  <li>Evidence hash (SHA-256) MUST be computed of <code>json.dumps(data, sort_keys=True).encode('utf-8')</code> BEFORE the DB write.</li>
+  <li>Audit log MUST be written synchronously in the same transaction as the action it audits.</li>
+  <li>LLM API keys MUST only be in <code>.env</code> / Docker secrets. Never returned in any API response.</li>
+  <li>AI output MUST be validated against Pydantic schema before storage. Invalid output is discarded — do NOT store it.</li>
+  <li>All collector sub-processes MUST have a 30-second timeout enforced by asyncio.wait_for().</li>
+  <li>Celery tasks must use acknowledge late=True and reject on worker lost for evidence collection tasks.</li>
+</ul>
+
+<h4>Collector Output Schema (must match frontend types)</h4>
+<pre><code>ProcessEvidence(TypedDict):
+  pid: int; name: str; cmdline: str; user: str;
+  parent_pid: int; parent_name: str; hash_sha256: Optional[str]
+  started_at: str; memory_mb: Optional[float]; cpu_percent: Optional[float]
+
+FileEvidence(TypedDict):
+  path: str; size: int; hash_sha256: str; hash_md5: str
+  created_at: str; modified_at: str; accessed_at: str
+  permissions: str; owner: str; is_executable: bool
+
+NetworkConnectionEvidence(TypedDict):
+  src_ip: str; src_port: int; dst_ip: str; dst_port: int
+  protocol: str; state: str; pid: Optional[int]; process_name: Optional[str]
+  bytes_sent: Optional[int]; bytes_recv: Optional[int]
+
+UserEvidence(TypedDict):
+  username: str; uid: Optional[int]; gid: Optional[int]; home: str
+  shell: str; last_login: Optional[str]; groups: list[str]
+
+SystemEventEvidence(TypedDict):
+  event_id: Optional[int]; event_type: str; timestamp: str
+  source: str; description: str; user: Optional[str]; pid: Optional[int]</code></pre>
+
+<h4>Acceptance Criteria for OpenCode</h4>
+<ul class="checklist">
+  <li>docker compose up → all services healthy within 60s</li>
+  <li>POST /auth/login returns JWT with correct role claim</li>
+  <li>FQL "INVESTIGATE processes WHERE name CONTAINS 'python'" collects real processes</li>
+  <li>Evidence items have valid SHA-256 hash; hash verified on GET</li>
+  <li>Neo4j graph shows correct relationships after evidence collection</li>
+  <li>Policy engine denies network capture for INVESTIGATOR role</li>
+  <li>Audit log has entry for every investigation creation and FQL execution</li>
+  <li>AI correlation returns valid JSON matching CorrelationResult schema</li>
+  <li>Invalid LLM output discarded; endpoint returns error — not garbage data</li>
+  <li>Rate limit: 21st FQL execution in an hour returns HTTP 429</li>
+  <li>All endpoints return errors in standard format defined in §06</li>
+  <li>Alembic migrate from scratch reproduces full schema</li>
+</ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="s17">
+<h2><span class="sec-num">17</span> Risks</h2>
+
+<table>
+  <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td>LLM API unavailable or rate-limited during demo</td><td class="risk-high">HIGH</td><td>HIGH — "What Happened?" feature breaks</td><td>Pre-generate and cache a demo AI response; show cached result if API fails. Fallback to OpenAI if Anthropic fails.</td></tr>
+  <tr><td>Neo4j complexity underestimated; graph queries slow</td><td class="risk-med">MED</td><td>MED — correlation dashboard sluggish</td><td>Limit graph to top 200 nodes per investigation in MVP. Add LIMIT to all Cypher queries.</td></tr>
+  <tr><td>PCAP capture requires root / CAP_NET_RAW</td><td class="risk-high">HIGH</td><td>MED — network collector needs privilege setup</td><td>Document setup clearly. For demo: use pre-captured .pcap file for Zeek analysis instead of live capture.</td></tr>
+  <tr><td>WeasyPrint PDF rendering breaks on complex HTML</td><td class="risk-med">MED</td><td>LOW — report feature only</td><td>Test report template early (Phase D4). Keep template simple: tables and lists only, no complex CSS.</td></tr>
+  <tr><td>Blockchain Sepolia testnet congested; anchor fails</td><td class="risk-med">MED</td><td>LOW — demo feature only</td><td>Blockchain anchor is async fire-and-forget. Demo shows status="PENDING" which is acceptable for judges.</td></tr>
+  <tr><td>FQL grammar too limited for demo scenario</td><td class="risk-low">LOW</td><td>HIGH if judges ask unsupported queries</td><td>Pre-plan 5 specific demo FQL queries. Rehearse them. Add those specific capabilities first.</td></tr>
+  <tr><td>Windows collector untested (team likely on Linux)</td><td class="risk-high">HIGH</td><td>MED — demo on Linux covers this</td><td>Demo on Linux only. Document Windows support as roadmap item. Use psutil cross-platform functions only.</td></tr>
+</table>
+</section>
+
+<!-- ============================================================ -->
+<section id="s18">
+<h2><span class="sec-num">18</span> Definition of Done</h2>
+
+<div class="success-box">The product is DONE when ALL of the following are true:</div>
+
+<h3>Backend</h3>
+<ul class="checklist">
+  <li>All API endpoints in §06 implemented and returning correct response shapes</li>
+  <li>FQL parser handles all 5 collector types with WHERE clauses</li>
+  <li>Policy engine enforces all role/collector restrictions</li>
+  <li>All 5 collectors (process, file, network, user, event) operational on Linux</li>
+  <li>Every evidence item has SHA-256 hash; constraint prevents duplicates</li>
+  <li>Neo4j receives evidence nodes and relationships after every collection</li>
+  <li>AI correlation returns structured JSON with evidence citations</li>
+  <li>PDF report generated with timeline + evidence table + AI narrative</li>
+  <li>Audit log written for every state-changing action</li>
+  <li>Rate limiting enforced (429 on excess)</li>
+  <li>All unit tests pass (parser, policy, evidence service, AI validation)</li>
+  <li>All API integration tests pass</li>
+  <li>No Python security warnings from bandit scan</li>
+</ul>
+
+<h3>Frontend</h3>
+<ul class="checklist">
+  <li>Login, investigation creation, FQL execution, evidence browse, timeline, graph, AI, reports — all functional</li>
+  <li>FQL editor validates syntax in real time</li>
+  <li>WebSocket delivers live job status updates</li>
+  <li>Evidence graph renders USER→PROCESS→FILE→NETWORK→EVENT correctly</li>
+  <li>Timeline is chronological; events clickable</li>
+  <li>AI result page shows "What Happened?" narrative with MITRE tags</li>
+  <li>No TypeScript errors (<code>tsc --noEmit</code> passes)</li>
+  <li>No accessibility violations (axe-core scan)</li>
+</ul>
+
+<h3>Infrastructure</h3>
+<ul class="checklist">
+  <li><code>docker compose up</code> → fully working system within 90 seconds</li>
+  <li>TLS configured for local HTTPS (self-signed for dev, documented for prod)</li>
+  <li>All secrets in .env; .env.example committed without real secrets</li>
+  <li>Database migrations reproducible from scratch</li>
+  <li>README contains architecture overview + demo script with exact FQL queries to type</li>
+</ul>
+
+<h3>Security</h3>
+<ul class="checklist">
+  <li>All security headers present (validated by securityheaders.com or equivalent)</li>
+  <li>No API keys or passwords in any log output</li>
+  <li>RBAC test matrix: all role/endpoint combinations documented and tested</li>
+  <li>FQL injection test suite passes</li>
+  <li>Evidence hash verified by Codex audit</li>
+</ul>
+
+<h3>Demo Readiness</h3>
+<ul class="checklist">
+  <li>Demo investigation pre-seeded with realistic evidence (minimum 50 items across all types)</li>
+  <li>AI "What Happened?" pre-cached response available if API is down</li>
+  <li>Blockchain anchor tx visible on Sepolia Etherscan for at least one evidence item</li>
+  <li>5-minute demo script rehearsed end-to-end by at least 2 team members</li>
+  <li>Architecture diagram printed or on second screen for judge Q&A</li>
+</ul>
+</section>
+
+</main>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'dark', themeVariables: {
+    primaryColor: '#1f8ef1', primaryTextColor: '#e6edf3', primaryBorderColor: '#30363d',
+    lineColor: '#8b949e', secondaryColor: '#1c2230', tertiaryColor: '#161b22',
+    background: '#0d1117', mainBkg: '#161b22', nodeBorder: '#30363d',
+    clusterBkg: '#1c2230', titleColor: '#e6edf3', edgeLabelBackground: '#1c2230'
+  }});
+
+  // Sidebar active link highlighting
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+</body>
+</html>

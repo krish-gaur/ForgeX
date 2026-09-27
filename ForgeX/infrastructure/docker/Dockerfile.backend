@@ -1,0 +1,34 @@
+# ForgeX backend — FastAPI + FQL + collectors + sandboxed forensic functions.
+# The sandbox runs user forensic functions as restricted child processes, so the
+# runtime image keeps a full Python (no distroless) but runs as non-root.
+FROM python:3.13-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# tshark is optional (pcap parsing is pure-Python); procps helps live collectors.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends procps \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /srv/forgex
+
+COPY backend/requirements.txt backend/requirements.txt
+RUN pip install -r backend/requirements.txt
+
+COPY backend/ backend/
+COPY datasets/ datasets/
+
+# sandbox + runtime state
+RUN mkdir -p backend/data/files && useradd -m -u 10001 forgex \
+    && chown -R forgex:forgex /srv/forgex
+USER forgex
+
+WORKDIR /srv/forgex/backend
+EXPOSE 8000
+
+HEALTHCHECK --interval=15s --timeout=4s --start-period=20s \
+    CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3).status==200 else 1)"
+
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

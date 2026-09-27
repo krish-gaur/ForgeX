@@ -1,0 +1,119 @@
+[
+  {
+    "event_id": 4625,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:02:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5000 ssh2",
+    "user": "svc_backup",
+    "pid": 800
+  },
+  {
+    "event_id": 4626,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:03:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5010 ssh2",
+    "user": "svc_backup",
+    "pid": 801
+  },
+  {
+    "event_id": 4627,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:04:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5020 ssh2",
+    "user": "svc_backup",
+    "pid": 802
+  },
+  {
+    "event_id": 4628,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:05:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5030 ssh2",
+    "user": "svc_backup",
+    "pid": 803
+  },
+  {
+    "event_id": 4629,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:06:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5040 ssh2",
+    "user": "svc_backup",
+    "pid": 804
+  },
+  {
+    "event_id": 4630,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:07:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5050 ssh2",
+    "user": "svc_backup",
+    "pid": 805
+  },
+  {
+    "event_id": 4631,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:08:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5060 ssh2",
+    "user": "svc_backup",
+    "pid": 806
+  },
+  {
+    "event_id": 4632,
+    "event_type": "login_failure",
+    "timestamp": "2026-09-26T10:09:12+00:00",
+    "source": "auth.log",
+    "description": "Failed password for svc_backup from 198.51.100.23 port 5070 ssh2",
+    "user": "svc_backup",
+    "pid": 807
+  },
+  {
+    "event_id": 4624,
+    "event_type": "login_success",
+    "timestamp": "2026-09-26T10:12:44+00:00",
+    "source": "auth.log",
+    "description": "Accepted password for svc_backup from 198.51.100.23 port 5911 ssh2",
+    "user": "svc_backup",
+    "pid": 899
+  },
+  {
+    "event_id": 4648,
+    "event_type": "privilege_use",
+    "timestamp": "2026-09-26T10:13:30+00:00",
+    "source": "auth.log",
+    "description": "sudo: svc_backup : command=/usr/bin/install -m 755 updater.exe /tmp/updater.exe",
+    "user": "svc_backup",
+    "pid": 901
+  },
+  {
+    "event_id": 4698,
+    "event_type": "persistence",
+    "timestamp": "2026-09-26T10:15:02+00:00",
+    "source": "schtasks",
+    "description": "Scheduled task 'UpdaterSvc' created pointing to C:\\Temp\\updater.exe",
+    "user": "svc_backup",
+    "pid": 4600
+  },
+  {
+    "event_id": 4688,
+    "event_type": "process_create",
+    "timestamp": "2026-09-26T10:14:10+00:00",
+    "source": "sysmon",
+    "description": "Process created: powershell.exe -enc JABwAHIAbwBjACAAPQAg...",
+    "user": "svc_backup",
+    "pid": 4567
+  },
+  {
+    "event_id": 5156,
+    "event_type": "network_connect",
+    "timestamp": "2026-09-26T10:16:20+00:00",
+    "source": "sysmon",
+    "description": "Windows Filter Platform permitted connection to 203.0.113.9:4444",
+    "user": "svc_backup",
+    "pid": 4567
+  }
+]

@@ -1,0 +1,11 @@
+# Optional production / integration dependencies.
+# The backend imports these lazily and degrades gracefully when absent.
+celery==5.4.0          # TASK_BACKEND=celery
+redis==5.2.1           # Celery broker + cache
+neo4j==5.27.0          # GRAPH_STORE=neo4j
+psycopg[binary]==3.2.3 # DATABASE_URL=postgresql+asyncpg://...
+asyncpg==0.30.0        # async Postgres driver
+web3==7.6.0            # BLOCKCHAIN_ANCHOR=sepolia
+anthropic==0.42.0      # LLM_PROVIDER=anthropic
+openai==1.58.1         # LLM_PROVIDER=openai / embeddings
+python-evtx==0.10.0    # Windows .evtx parsing

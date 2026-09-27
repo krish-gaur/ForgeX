@@ -1,0 +1,25 @@
+# ForgeX backend lint configuration (production rule set).
+line-length = 140
+target-version = "py313"
+extend-exclude = ["alembic/versions", "data"]
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # comprehensions
+]
+ignore = [
+    "E501",  # line length handled by formatter settings; long forensic payloads inline
+    "B008",  # FastAPI dependency injection pattern: Depends(...) in default args
+    "UP042", # keep `class X(str, Enum)` for explicit JSON-serializable enums
+    "B905",  # zip() strict= not required for forensic record pairing
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["B011", "E402"]
+"forgex_sdk/forgex/_runtime.py" = ["B006"]

@@ -1,0 +1,334 @@
+# ============================================================
+
+# FORGE·X — Forensic Intelligence Workbench
+
+# Root .gitignore
+
+# ============================================================
+
+# ------------------------------------------------------------
+
+# Environment & secrets
+
+# ------------------------------------------------------------
+
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Private keys / certificates
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+
+# ------------------------------------------------------------
+
+# Python / FastAPI
+
+# ------------------------------------------------------------
+
+**pycache**/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+ENV/
+
+# Python packaging
+
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Test / coverage
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.pyre/
+.pytype/
+
+# Ruff / tooling caches
+
+.ruff_cache/
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# ------------------------------------------------------------
+
+# Node / Next.js
+
+# ------------------------------------------------------------
+
+node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+
+# npm
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Optional package-manager caches
+
+.npm/
+.yarn/cache/
+.pnpm-store/
+
+# ------------------------------------------------------------
+
+# Build / generated files
+
+# ------------------------------------------------------------
+
+*.tsbuildinfo
+
+# ------------------------------------------------------------
+
+# Databases / local runtime data
+
+# ------------------------------------------------------------
+
+*.db
+*.sqlite
+*.sqlite3
+
+# SQLite temporary files
+
+*.db-shm
+*.db-wal
+*.sqlite-shm
+*.sqlite-wal
+
+# Local Postgres / database dumps
+
+*.dump
+*.sql.gz
+
+# ------------------------------------------------------------
+
+# Logs
+
+# ------------------------------------------------------------
+
+*.log
+logs/
+*.log.*
+
+# ------------------------------------------------------------
+
+# Generated reports / exports
+
+# ------------------------------------------------------------
+
+# Ignore generated forensic reports, but keep report templates/source.
+
+generated/
+exports/
+reports/generated/
+artifacts/generated/
+
+# PDF reports generated during local development
+
+# Remove this rule if generated PDFs are intentionally committed.
+
+reports/*.pdf
+
+# ------------------------------------------------------------
+
+# Runtime / temporary files
+
+# ------------------------------------------------------------
+
+tmp/
+temp/
+.cache/
+.cache-loader/
+*.tmp
+*.temp
+*.pid
+
+# ------------------------------------------------------------
+
+# IDE / editors
+
+# ------------------------------------------------------------
+
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.iml
+
+# Vim
+
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------
+
+# OS files
+
+# ------------------------------------------------------------
+
+.DS_Store
+.DS_Store?
+Thumbs.db
+Desktop.ini
+
+# ------------------------------------------------------------
+
+# Docker
+
+# ------------------------------------------------------------
+
+# Local Docker overrides
+
+docker-compose.override.yml
+
+# Docker volumes / local state
+
+.docker/
+docker-data/
+volumes/
+
+# ------------------------------------------------------------
+
+# Infrastructure / deployment secrets
+
+# ------------------------------------------------------------
+
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ------------------------------------------------------------
+
+# Security / forensic local data
+
+# ------------------------------------------------------------
+
+# Never commit locally collected evidence or raw forensic dumps.
+
+local-evidence/
+private-evidence/
+forensic-output/
+captures/
+memory-dumps/
+pcaps/
+*.pcap
+*.pcapng
+*.dmp
+*.raw
+*.mem
+
+# Local evidence exports
+
+*.evtx
+*.reg
+*.hive
+
+# ------------------------------------------------------------
+
+# AI / model caches
+
+# ------------------------------------------------------------
+
+.cache/
+models/
+model-cache/
+huggingface/
+.transformers/
+
+# ------------------------------------------------------------
+
+# Local demo / runtime secrets
+
+# ------------------------------------------------------------
+
+demo-secrets/
+local-secrets/
+
+# ------------------------------------------------------------
+
+# Generated frontend assets
+
+# ------------------------------------------------------------
+
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# ------------------------------------------------------------
+
+# Generated backend files
+
+# ------------------------------------------------------------
+
+backend/.venv/
+backend/**pycache**/
+backend/.pytest_cache/
+backend/.ruff_cache/
+
+# ------------------------------------------------------------
+
+# Environment files inside subprojects
+
+# ------------------------------------------------------------
+
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ------------------------------------------------------------
+
+# Local development overrides
+
+# ------------------------------------------------------------
+
+*.local
+*.override
+
+# ------------------------------------------------------------
+
+# Keep important example/config files
+
+# ------------------------------------------------------------
+
+!.gitkeep
+!.env.example
+!.env.sample
+!README.md
+!docs/
+!docs/**
+!datasets/
+!datasets/**
+!templates/
+!templates/**

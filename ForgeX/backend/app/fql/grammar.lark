@@ -1,0 +1,49 @@
+// ForgeX FQL — Forensic Query Language grammar (architecture §08).
+// Superset note: the architecture grammar allows one statement; ForgeX allows a
+// sequence of statements so investigators can script multi-collector sweeps.
+start: statement+
+
+statement: investigate_stmt | timeline_stmt
+
+investigate_stmt: INVESTIGATE collector where_clause? limit_clause?
+timeline_stmt: TIMELINE FROM DATETIME TO DATETIME
+
+where_clause: WHERE condition (bool_op condition)*
+condition: FIELD OP value
+bool_op: AND | OR
+limit_clause: LIMIT INT
+
+collector: PROCESSES | FILES | NETWORK | USERS | EVENTS
+
+value: STRING | NUMBER | "(" value_list ")"
+value_list: value ("," value)*
+
+INVESTIGATE: "INVESTIGATE"i
+TIMELINE: "TIMELINE"i
+WHERE: "WHERE"i
+FROM: "FROM"i
+TO: "TO"i
+AND: "AND"i
+OR: "OR"i
+LIMIT: "LIMIT"i
+PROCESSES: "processes"i
+FILES: "files"i
+NETWORK: "network"i
+USERS: "users"i
+EVENTS: "events"i
+
+OP.3: "!=" | "=" | ">=" | "<=" | ">" | "<" | NOT_CONTAINS | CONTAINS | NOT_IN | IN
+NOT_CONTAINS: "NOT"i WS_INLINE+ "CONTAINS"i
+CONTAINS: "CONTAINS"i
+NOT_IN: "NOT"i WS_INLINE+ "IN"i
+IN: "IN"i
+
+FIELD.1: /[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?/
+DATETIME.4: /"?\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?"?/
+STRING: /'[^']*'|"[^"]*"/
+NUMBER: /\d+(\.\d+)?/
+WS_INLINE: /[ \t]/
+
+%import common.INT
+%import common.WS
+%ignore WS

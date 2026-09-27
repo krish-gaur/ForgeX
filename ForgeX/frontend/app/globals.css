@@ -1,0 +1,340 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==================================================================
+   ForgeX — global light design system
+   Bright surfaces, hairline borders, one restrained accent.
+   Colour is reserved for state, not decoration.
+   ================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: light;
+
+    /* Spacing scale — precise, small increments. */
+    --fx-radius-sm: 4px;
+    --fx-radius: 6px;
+    --fx-radius-lg: 8px;
+
+    /* Motion — quick, quiet, never decorative. */
+    --fx-fast: 120ms;
+    --fx-base: 150ms;
+    --fx-slow: 200ms;
+    --fx-ease: cubic-bezier(0.2, 0, 0.2, 1);
+  }
+
+  * {
+    border-color: theme("colors.edge");
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: theme("colors.void");
+    color: theme("colors.ink");
+    font-family: theme("fontFamily.sans");
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "tnum" 0;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numeric columns must align; technical values use tabular figures. */
+  .tabular,
+  th,
+  td,
+  .tbl {
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: theme("colors.ink");
+    letter-spacing: -0.011em;
+  }
+
+  /* Visible, consistent keyboard focus across the whole product. */
+  :focus-visible {
+    outline: 2px solid theme("colors.accent");
+    outline-offset: 1px;
+  }
+
+  ::selection {
+    background: theme("colors.accentSoft");
+    color: theme("colors.ink");
+  }
+
+  /* Thin, quiet scrollbars for dense data regions. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d5d9e0;
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #b4bac4;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Reduce motion for users who ask for it. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* ---------------------------------------------------------------
+     Panel — the primary grouping surface. A hairline border and the
+     lightest possible shadow; never a floating, glowing card.
+     --------------------------------------------------------------- */
+  .panel {
+    @apply relative rounded-lg border border-edge bg-panel shadow-panel;
+  }
+  .panel-cyan {
+    @apply border-cyanEdge;
+  }
+  .panel-dim {
+    @apply bg-panel2/60;
+  }
+  .panel-flat {
+    @apply rounded-lg border border-edge bg-panel;
+  }
+
+  .panel-title {
+    @apply flex min-h-[38px] items-center gap-2 border-b border-edge bg-panel2/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted;
+  }
+
+  /* Section heading — replaces the old neon HUD title. */
+  .hud-title {
+    @apply text-[11px] font-semibold uppercase tracking-[0.1em] text-muted;
+  }
+
+  .page-title {
+    @apply text-[19px] font-semibold leading-tight tracking-[-0.015em] text-ink;
+  }
+  .page-sub {
+    @apply mt-0.5 text-[12px] leading-relaxed text-muted;
+  }
+
+  /* ---------------------------------------------------------------
+     Labels, inputs, selects, textareas
+     --------------------------------------------------------------- */
+  .label {
+    @apply mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-edge bg-panel px-2.5 py-1.5 text-[13px] text-ink outline-none transition-[border-color,box-shadow] duration-[120ms] placeholder:text-faint hover:border-edge2 focus:border-accent focus:ring-[3px] focus:ring-accent/10 focus:shadow-xs;
+  }
+  textarea.input {
+    @apply resize-y leading-relaxed;
+  }
+  .select {
+    @apply input cursor-pointer appearance-none bg-none bg-[length:14px_14px] bg-[right_0.5rem_center] bg-no-repeat pr-8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+  .input:disabled,
+  .select:disabled {
+    @apply cursor-not-allowed bg-panel2 text-faint;
+  }
+  .input-error {
+    @apply border-alarm focus:border-alarm focus:ring-alarm/10;
+  }
+
+  /* ---------------------------------------------------------------
+     Buttons — restrained, 6px radius, quiet transitions.
+     --------------------------------------------------------------- */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-edge bg-panel px-3 py-1.5 text-[12px] font-medium leading-none text-ink transition-[background-color,border-color,color,box-shadow] duration-[120ms] ease-swift disabled:pointer-events-none disabled:opacity-45;
+  }
+  .btn-primary {
+    @apply btn border-accent bg-accent text-white hover:border-[#1D4ED8] hover:bg-[#1D4ED8] active:bg-[#1E40AF];
+  }
+  .btn-cyan {
+    @apply btn border-cyanEdge bg-cyanSoft text-cyanx hover:border-cyanx/40 hover:bg-[#E0F2FE];
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-muted hover:border-edge2 hover:bg-panel2 hover:text-ink;
+  }
+  .btn-danger {
+    @apply btn border-alarmEdge bg-alarmSoft text-alarm hover:border-alarm/40 hover:bg-[#FEE4E2];
+  }
+  .btn-success {
+    @apply btn border-phosphorEdge bg-phosphorSoft text-phosphorDim hover:border-phosphor/40 hover:bg-[#D3F8DF];
+  }
+  .btn-sm {
+    @apply px-2 py-1 text-[11.5px];
+  }
+  .btn-xs {
+    @apply gap-1 px-1.5 py-0.5 text-[11px];
+  }
+  .btn-icon {
+    @apply h-7 w-7 shrink-0 p-0;
+  }
+  .btn-active {
+    @apply border-accent bg-accentSoft text-accent;
+  }
+
+  /* ---------------------------------------------------------------
+     Badges — small, quiet, semantic.
+     --------------------------------------------------------------- */
+  .badge {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded border px-1.5 py-px text-[10px] font-semibold uppercase leading-[16px] tracking-[0.04em];
+  }
+  .badge-neutral {
+    @apply badge border-edge bg-panel2 text-muted;
+  }
+  .badge-outline {
+    @apply badge border-edge2 bg-transparent text-muted;
+  }
+
+  /* ---------------------------------------------------------------
+     Tables — a primary surface of the product. Compact rows, sticky
+     headers, strong alignment, quiet hover.
+     --------------------------------------------------------------- */
+  .tbl {
+    @apply w-full border-collapse text-left;
+  }
+  .tbl thead th {
+    @apply sticky top-0 z-10 whitespace-nowrap border-b border-edge bg-panel2 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.07em] text-muted;
+  }
+  .tbl tbody td {
+    @apply border-b border-grid px-3 py-2 align-middle text-[12.5px] text-ink;
+  }
+  .tbl tbody tr {
+    @apply transition-colors duration-[120ms];
+  }
+  .tbl tbody tr:hover td {
+    @apply bg-[#F7F9FC];
+  }
+  .tbl tbody tr[data-selected="true"] td {
+    @apply bg-accentSoft;
+  }
+  .tbl-compact tbody td {
+    @apply px-2.5 py-1.5 text-[12px];
+  }
+  .tbl-compact thead th {
+    @apply px-2.5 py-1.5;
+  }
+
+  /* Sortable header affordance. */
+  .th-sort {
+    @apply cursor-pointer select-none transition-colors duration-[120ms] hover:text-ink;
+  }
+  .th-sort[data-active="true"] {
+    @apply text-ink;
+  }
+
+  /* ---------------------------------------------------------------
+     Misc primitives
+     --------------------------------------------------------------- */
+  .led {
+    @apply inline-block h-1.5 w-1.5 shrink-0 rounded-full;
+  }
+
+  /* Status dot that breathes while a job is in flight. */
+  .led-live {
+    @apply animate-pulse-dot;
+  }
+
+  /* Monospace technical value — ids, hashes, timestamps, payloads. */
+  .mono {
+    @apply font-mono text-[11.5px];
+  }
+  .tech {
+    @apply rounded border border-edge bg-panel2 px-1 py-px font-mono text-[11px] text-ink;
+  }
+
+  /* Code / payload / log surface: light gray, never black. */
+  .codeblock {
+    @apply overflow-auto rounded-md border border-codeEdge bg-code p-2.5 font-mono text-[11.5px] leading-relaxed text-codeInk;
+  }
+
+  .glow-text {
+    @apply text-accent;
+  }
+  .cursor-blink::after {
+    content: "\200B";
+  }
+
+  /* Divider */
+  .rule {
+    @apply border-t border-edge;
+  }
+
+  /* Keyboard key */
+  .kbd {
+    @apply inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-edge bg-panel2 px-1 font-mono text-[10px] leading-none text-muted;
+  }
+
+  /* Provenance striping for clearly-labelled synthetic data. */
+  .synthetic-stripe {
+    background-image: repeating-linear-gradient(-45deg, rgba(217, 119, 6, 0.1) 0 5px, transparent 5px 10px);
+  }
+
+  /* Monaco sits flush inside a bordered region. */
+  .monaco-shell .monaco-editor,
+  .monaco-shell .monaco-editor .overflow-guard {
+    @apply bg-code;
+  }
+  .monaco-shell {
+    @apply overflow-hidden rounded-md border border-edge;
+  }
+  .monaco-shell .monaco-editor .margin {
+    @apply bg-[#F3F5F8];
+  }
+}
+
+@layer utilities {
+  /* Skeleton loading placeholder. */
+  .skeleton {
+    @apply relative overflow-hidden rounded bg-panel2;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+  }
+
+  /* Consistent vertical rhythm helper. */
+  .stack-xs > * + * {
+    @apply mt-1;
+  }
+  .stack-sm > * + * {
+    @apply mt-2;
+  }
+  .stack-md > * + * {
+    @apply mt-3;
+  }
+  .stack-lg > * + * {
+    @apply mt-4;
+  }
+  .stack-xl > * + * {
+    @apply mt-6;
+  }
+}

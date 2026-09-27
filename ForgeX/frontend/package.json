@@ -1,0 +1,32 @@
+{
+  "name": "forgex-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ForgeX \u2014 Forensic Intelligence Workbench (SIH26148, Team AIGloryThm)",
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "node .next/standalone/server.js",
+    "typecheck": "tsc --noEmit",
+    "start:dev": "next start -H 0.0.0.0 -p 3000"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "4.7.0",
+    "@xyflow/react": "12.4.2",
+    "clsx": "2.1.1",
+    "lucide-react": "0.471.0",
+    "monaco-editor": "0.52.2",
+    "next": "15.5.26",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.5.1",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3"
+  }
+}

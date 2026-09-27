@@ -1,0 +1,23 @@
+[
+  {
+    "kind": "download",
+    "url": "http://phish.example.top/updater.exe",
+    "title": "Q3 bonus statement.exe",
+    "visited_at": "2026-09-26T10:13:35+00:00",
+    "user": "svc_backup"
+  },
+  {
+    "kind": "history",
+    "url": "http://phish.example.top/login",
+    "title": "Corporate portal sign-in",
+    "visited_at": "2026-09-26T10:13:30+00:00",
+    "user": "svc_backup"
+  },
+  {
+    "kind": "history",
+    "url": "https://intranet.corp/finance/q3",
+    "title": "Finance Q3",
+    "visited_at": "2026-09-26T10:09:00+00:00",
+    "user": "svc_backup"
+  }
+]

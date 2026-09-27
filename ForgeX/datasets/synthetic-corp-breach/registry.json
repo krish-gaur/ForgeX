@@ -1,0 +1,20 @@
+[
+  {
+    "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\UpdaterSvc",
+    "value": "C:\\Temp\\updater.exe",
+    "modified_at": "2026-09-26T10:15:02+00:00",
+    "_links": [
+      {
+        "process": {
+          "pid": 4600,
+          "name": "updater.exe"
+        }
+      }
+    ]
+  },
+  {
+    "key": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\WinDefend\\Start",
+    "value": 4,
+    "modified_at": "2026-09-26T10:15:04+00:00"
+  }
+]
