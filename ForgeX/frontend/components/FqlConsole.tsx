@@ -1,7 +1,7 @@
 "use client";
 
-// FQL intent console: validate (syntax + policy preview) â†’ execute â†’ poll job.
-// The entry point of the product flow: INTENT â†’ EXECUTION â†’ EVIDENCE.
+// FQL intent console: validate (syntax + policy preview) →’ execute →’ poll job.
+// The entry point of the product flow: INTENT →’ EXECUTION →’ EVIDENCE.
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Play, ScanSearch, ShieldQuestion, XCircle } from "lucide-react";
@@ -75,7 +75,7 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
           if (["COMPLETED", "FAILED", "PARTIAL", "POLICY_DENIED"].includes(st.status)) {
             stopPoll();
             if (st.status === "COMPLETED" || st.status === "PARTIAL") {
-              toast("ok", `Collection ${st.status.toLowerCase()} â€” ${st.items_collected_so_far ?? 0} evidence item(s) secured.`);
+              toast("ok", `Collection ${st.status.toLowerCase()} — ${st.items_collected_so_far ?? 0} evidence item(s) secured.`);
               onCollected?.();
             } else {
               toast("err", `Job ${st.status}: ${st.error ?? "see job status"}`);
@@ -118,7 +118,7 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
         `/api/v1/investigations/${investigationId}/fql/execute`,
         { fql },
       );
-      toast("info", `Job ${r.job_id.slice(0, 8)} queued â€” collectors: ${r.collectors.join(", ")}`);
+      toast("info", `Job ${r.job_id.slice(0, 8)} queued — collectors: ${r.collectors.join(", ")}`);
       setJob({ job_id: r.job_id, status: "QUEUED" });
       pollJob(r.job_id);
     } catch (e) {
@@ -139,7 +139,7 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
         <span className={connected ? "led bg-phosphor " : "led bg-faint"} />
         {connected ? "live channel connected" : "polling mode"}
         <span className="flex-1" />
-        <span>fql Â· intent language</span>
+        <span>fql · intent language</span>
       </div>
 
       <Monaco value={fql} onChange={setFql} language="fql" height={130} />
@@ -158,14 +158,14 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
         )}
         {validation?.valid && !pv && (
           <span className="flex items-center gap-1.5 text-[11.5px] text-phosphorDim">
-            <CheckCircle2 size={13} /> syntax ok â€” collectors: {(validation.estimated_collectors ?? []).join(", ")}
+            <CheckCircle2 size={13} /> syntax ok — collectors: {(validation.estimated_collectors ?? []).join(", ")}
           </span>
         )}
         {pv && (
           <span className="flex items-center gap-1.5 text-[11.5px]">
             {pv.status === "ALLOWED" ? <CheckCircle2 size={13} className="text-phosphorDim" /> : <ShieldQuestion size={13} className="text-alarm" />}
             policy: <StatusPill status={pv.status} />
-            {pv.reasons?.length ? <span className="text-faint">â€” {pv.reasons.join("; ")}</span> : null}
+            {pv.reasons?.length ? <span className="text-faint">— {pv.reasons.join("; ")}</span> : null}
           </span>
         )}
       </div>
@@ -187,7 +187,7 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
                 ))}
               </span>
             )}
-            {job.error && <span className="text-alarm">âš  {job.error}</span>}
+            {job.error && <span className="text-alarm">⚠ {job.error}</span>}
           </div>
         </div>
       )}
@@ -195,7 +195,7 @@ export default function FqlConsole({ investigationId, onCollected }: { investiga
       {examples.length > 0 && (
         <details className="group border border-grid bg-panel2/30">
           <summary className="cursor-pointer select-none px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-faint hover:text-muted">
-            â–¸ example intents ({examples.length})
+            ▷ example intents ({examples.length})
           </summary>
           <div className="space-y-1 border-t border-grid p-2">
             {examples.map((ex, i) => (

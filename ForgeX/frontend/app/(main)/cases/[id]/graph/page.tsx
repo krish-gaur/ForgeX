@@ -1,6 +1,6 @@
 "use client";
 
-// Correlation graph: USERâ†’PROCESSâ†’FILEâ†’NETWORKâ†’EVENT evidence relationships,
+// Correlation graph: USER→’PROCESS→’FILE→’NETWORK→’EVENT evidence relationships,
 // rendered with @xyflow/react. Nodes are built only from real evidence payloads.
 import {
   Background,
@@ -23,10 +23,10 @@ import type { GraphData } from "@/lib/types";
 
 const TYPE_STYLE: Record<string, { border: string; bg: string; text: string; glyph: string }> = {
   user: { border: "#b28dff", bg: "rgba(178,141,255,0.10)", text: "#b28dff", glyph: "ðŸ‘¤" },
-  process: { border: "#3dff9e", bg: "rgba(61,255,158,0.08)", text: "#3dff9e", glyph: "âš™" },
+  process: { border: "#3dff9e", bg: "rgba(61,255,158,0.08)", text: "#3dff9e", glyph: "⚙" },
   file: { border: "#35d6ff", bg: "rgba(53,214,255,0.08)", text: "#35d6ff", glyph: "ðŸ—Ž" },
-  network: { border: "#ffb547", bg: "rgba(255,181,71,0.08)", text: "#ffb547", glyph: "â‡„" },
-  event: { border: "#ff8ad1", bg: "rgba(255,138,209,0.08)", text: "#ff8ad1", glyph: "âš¡" },
+  network: { border: "#ffb547", bg: "rgba(255,181,71,0.08)", text: "#ffb547", glyph: "⇄" },
+  event: { border: "#ff8ad1", bg: "rgba(255,138,209,0.08)", text: "#ff8ad1", glyph: "⚡" },
 };
 
 type ForgeNodeData = { label: string; nodeType: string; [k: string]: unknown };
@@ -55,7 +55,7 @@ function ForgeNode({ data, selected }: NodeProps<Node<ForgeNodeData>>) {
 
 const nodeTypes = { forge: ForgeNode };
 
-/** Deterministic layered layout: users â†’ processes â†’ files/network/events. */
+/** Deterministic layered layout: users →’ processes →’ files/network/events. */
 function layout(data: GraphData): { nodes: Node<ForgeNodeData>[]; edges: Edge[] } {
   const layerOf: Record<string, number> = { user: 0, process: 1, file: 2, network: 2, event: 3 };
   const buckets = new Map<number, GraphData["nodes"]>();
@@ -106,12 +106,12 @@ export default function GraphPage() {
   return (
     <div className="grid gap-4 lg:grid-cols-4">
       <Panel
-        title={`correlation graph â€” ${nodes.length} node(s), ${edges.length} relation(s)`}
+        title={`correlation graph — ${nodes.length} node(s), ${edges.length} relation(s)`}
         className="lg:col-span-3"
         variant="cyan"
       >
         {g.loading && <div className="p-6"><Spinner label="traversing evidence graph" /></div>}
-        {g.error && <div className="p-3 text-[12px] text-alarm">âš  {g.error}</div>}
+        {g.error && <div className="p-3 text-[12px] text-alarm">⚠ {g.error}</div>}
         {!g.loading && nodes.length === 0 && (
           <Empty
             text="graph is empty"
@@ -185,7 +185,7 @@ export default function GraphPage() {
             ))}
             <p className="border-t border-grid pt-2 text-[10px] leading-relaxed text-faint">
               Edges are forensic relations emitted by collectors: LAUNCHED, SPAWNED, ACCESSED_FILE, MADE_CONNECTION,
-              TRIGGERED_EVENT, RESOLVED_FROMâ€¦
+              TRIGGERED_EVENT, RESOLVED_FROM…
             </p>
           </div>
         </Panel>

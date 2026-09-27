@@ -2,7 +2,7 @@
 
 // Reconstructed incident timeline: custom SVG lane chart (no chart lib) with
 // severity-colored evidence events, type filters, hover detail and a synced
-// entry list â€” the "what happened, in what order" screen.
+// entry list — the "what happened, in what order" screen.
 import { useMemo, useState } from "react";
 import { get } from "@/lib/api";
 import { useData } from "@/lib/useData";
@@ -105,7 +105,7 @@ function TimelineChart({ entries, onPick, picked }: { entries: TimelineEntry[]; 
               fontSize={10.5}
               fontFamily="ui-monospace, monospace"
             >
-              {`${entries[active].timestamp.slice(11, 19)}Z Â· ${entries[active].label.slice(0, 34)}`}
+              {`${entries[active].timestamp.slice(11, 19)}Z · ${entries[active].label.slice(0, 34)}`}
             </text>
           </g>
         )}
@@ -148,7 +148,7 @@ export default function TimelinePage() {
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="hud-title">// incident timeline</h2>
         <span className="text-[11px] text-faint">
-          {all.length} timestamped evidence item(s){typeFilter.size ? ` Â· ${entries.length} shown` : ""} â€” reconstructed from real collected artifacts
+          {all.length} timestamped evidence item(s){typeFilter.size ? ` · ${entries.length} shown` : ""} — reconstructed from real collected artifacts
         </span>
         <div className="flex-1" />
         {types.map((t) => (
@@ -164,11 +164,11 @@ export default function TimelinePage() {
         ))}
       </div>
 
-      <Panel title="lane view â€” time flows left â†’ right">
+      <Panel title="lane view — time flows left →’ right">
         {tl.loading && <div className="p-4"><Spinner label="reconstructing timeline" /></div>}
-        {tl.error && <div className="p-3 text-[12px] text-alarm">âš  {tl.error}</div>}
+        {tl.error && <div className="p-3 text-[12px] text-alarm">⚠ {tl.error}</div>}
         {!tl.loading && all.length === 0 && (
-          <Empty text="nothing to reconstruct yet" hint="Collect evidence first â€” timeline entries are derived from artifact timestamps (process starts, log events, connection times)." />
+          <Empty text="nothing to reconstruct yet" hint="Collect evidence first — timeline entries are derived from artifact timestamps (process starts, log events, connection times)." />
         )}
         {!tl.loading && all.length > 0 && (
           <div className="p-2">
@@ -201,7 +201,7 @@ export default function TimelinePage() {
                   <td className="whitespace-nowrap font-mono text-[11px] text-accent">{fmtTime(e.timestamp)}</td>
                   <td><TypeBadge type={e.type} /></td>
                   <td className="max-w-md truncate text-ink" title={e.label}>{e.label}</td>
-                  <td>{e.severity ? <SeverityBadge severity={e.severity} /> : <span className="text-faint">â€”</span>}</td>
+                  <td>{e.severity ? <SeverityBadge severity={e.severity} /> : <span className="text-faint">—</span>}</td>
                   <td className="font-mono text-[10.5px] text-muted">{e.evidence_id.slice(0, 8)}</td>
                 </tr>
               ))}

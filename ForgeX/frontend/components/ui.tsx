@@ -1,6 +1,6 @@
 "use client";
 
-// ForgeX design system â€” light forensic workstation primitives.
+// ForgeX design system — light forensic workstation primitives.
 // Every screen composes from this file; do not restyle primitives per page.
 import clsx from "clsx";
 import Link from "next/link";

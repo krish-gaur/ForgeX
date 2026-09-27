@@ -214,7 +214,7 @@ function RailContent({
             {backendOk === null ? "Checking services" : backendOk ? "All services nominal" : "API unreachable"}
           </p>
           <p className="mt-0.5 truncate font-mono text-[10.5px] text-faint">
-            {backendOk ? `api/v1 Â· forgex v${VERSION}` : "no response from /health"}
+            {backendOk ? `api/v1 · forgex v${VERSION}` : "no response from /health"}
           </p>
         </div>
 

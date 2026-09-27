@@ -55,7 +55,7 @@ export default function ReportsPage() {
         type,
         title: title.trim() || null,
       });
-      toast("info", `Report ${r.report_id.slice(0, 8)} queued (${type}) â€” rendering PDFâ€¦`);
+      toast("info", `Report ${r.report_id.slice(0, 8)} queued (${type}) — rendering PDF…`);
       list.reload();
     } catch (e) {
       toast("err", errMsg(e));
@@ -95,10 +95,10 @@ export default function ReportsPage() {
             ))}
           </div>
           <Field label="custom title (optional)">
-            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${inv.name} â€” ${type.toLowerCase()} report`} />
+            <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={`${inv.name} — ${type.toLowerCase()} report`} />
           </Field>
           <Btn variant="primary" className="w-full" busy={busy} onClick={() => void generate()}>
-            â–¸ render pdf report
+            ▷ render pdf report
           </Btn>
           <p className="text-[10px] leading-relaxed text-faint">
             Reports are rendered server-side from REAL case data (findings, evidence, anchors, AI analyses). Synthetic
@@ -107,11 +107,11 @@ export default function ReportsPage() {
         </div>
       </Panel>
 
-      <Panel title={`generated reports â€” ${list.data?.data.length ?? 0}`} className="lg:col-span-2">
+      <Panel title={`generated reports — ${list.data?.data.length ?? 0}`} className="lg:col-span-2">
         {list.loading && <div className="p-4"><Spinner label="loading reports" /></div>}
-        {list.error && <div className="p-3 text-[12px] text-alarm">âš  {list.error}</div>}
+        {list.error && <div className="p-3 text-[12px] text-alarm">⚠ {list.error}</div>}
         {(list.data?.data.length ?? 0) === 0 && !list.loading && (
-          <Empty text="no reports yet" hint="Generate a report once findings exist â€” FULL reports include the complete evidentiary narrative." />
+          <Empty text="no reports yet" hint="Generate a report once findings exist — FULL reports include the complete evidentiary narrative." />
         )}
         <div className="divide-y divide-grid">
           {(list.data?.data ?? []).map((r) => (
@@ -120,9 +120,9 @@ export default function ReportsPage() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12.5px] font-bold text-ink">{r.title}</span>
                 <span className="block text-[10.5px] text-faint">
-                  {r.report_type.replace(/_/g, " ")} Â· requested {fmtTime(r.created_at)}
-                  {r.completed_at ? ` Â· rendered ${fmtTime(r.completed_at)}` : ""}
-                  {r.file_size_bytes ? ` Â· ${fmtBytes(r.file_size_bytes)}` : ""}
+                  {r.report_type.replace(/_/g, " ")} · requested {fmtTime(r.created_at)}
+                  {r.completed_at ? ` · rendered ${fmtTime(r.completed_at)}` : ""}
+                  {r.file_size_bytes ? ` · ${fmtBytes(r.file_size_bytes)}` : ""}
                 </span>
               </span>
               <StatusPill status={r.status} />

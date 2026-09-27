@@ -18,7 +18,7 @@ function EngineBadge({ engine, model }: { engine?: string | null; model?: string
   const isLlm = (engine ?? "").toLowerCase().includes("llm") || (engine ?? "").toLowerCase().includes("anthropic") || (engine ?? "").toLowerCase().includes("openai");
   return (
     <span className={`badge ${isLlm ? "border-violetx/60 text-muted" : "border-cyanx/50 text-accent"}`} title={model ?? undefined}>
-      <BrainCircuit size={10} /> {isLlm ? `LLM engine${model ? ` Â· ${model}` : ""}` : `deterministic heuristic${engine ? ` Â· ${engine}` : ""}`}
+      <BrainCircuit size={10} /> {isLlm ? `LLM engine${model ? ` · ${model}` : ""}` : `deterministic heuristic${engine ? ` · ${engine}` : ""}`}
     </span>
   );
 }
@@ -51,7 +51,7 @@ function CorrelationView({ a, onPromote, promoting }: { a: AiAnalysis; onPromote
       <div className="border border-phosphorDim/50 bg-phosphor/5 p-3.5">
         <p className="hud-title mb-1.5">what happened</p>
         <p className="whitespace-pre-wrap text-[12.5px] leading-relaxed text-ink">{r.what_happened}</p>
-        {r.caveat && <p className="mt-2 text-[10.5px] text-amber">âš  {r.caveat}</p>}
+        {r.caveat && <p className="mt-2 text-[10.5px] text-amber">⚠ {r.caveat}</p>}
       </div>
 
       {r.attack_stages?.length > 0 && (
@@ -74,7 +74,7 @@ function CorrelationView({ a, onPromote, promoting }: { a: AiAnalysis; onPromote
 
       {r.suspicious_indicators?.length > 0 && (
         <div>
-          <p className="label">suspicious indicators â€” each cites collected evidence</p>
+          <p className="label">suspicious indicators — each cites collected evidence</p>
           <div className="space-y-1.5">
             {r.suspicious_indicators.map((ind, i) => (
               <div key={i} className="flex flex-wrap items-center gap-2 border border-grid bg-void/60 p-2.5">
@@ -113,7 +113,7 @@ function CorrelationView({ a, onPromote, promoting }: { a: AiAnalysis; onPromote
             <p className="label">investigative gaps (what the evidence does NOT show)</p>
             <ul className="space-y-1">
               {r.gaps.map((g2, i) => (
-                <li key={i} className="border border-grid bg-panel2/40 px-2.5 py-1.5 text-[11px] text-muted">Â· {g2}</li>
+                <li key={i} className="border border-grid bg-panel2/40 px-2.5 py-1.5 text-[11px] text-muted">· {g2}</li>
               ))}
             </ul>
           </div>
@@ -153,7 +153,7 @@ export default function AiPage() {
     setRunning(true);
     try {
       await post(`/api/v1/investigations/${inv.id}/ai/correlate`);
-      toast("info", "Correlation job submitted â€” analyzing real collected evidenceâ€¦");
+      toast("info", "Correlation job submitted — analyzing real collected evidence…");
       const started = Date.now();
       pollRef.current = setInterval(async () => {
         analyses.reload();
@@ -165,7 +165,7 @@ export default function AiPage() {
             baseline.current.add(fresh.id);
             toast("ok", `Correlation complete (engine: ${fresh.engine ?? "unknown"}).`);
           } else {
-            toast("warn", "Correlation is taking longer than expected â€” check the list below.");
+            toast("warn", "Correlation is taking longer than expected — check the list below.");
           }
         }
       }, 1500);
@@ -197,7 +197,7 @@ export default function AiPage() {
     setPromoting(idx);
     try {
       const f = await post<Finding>(`/api/v1/ai/analyses/${a.id}/promote`, { indicator_index: idx });
-      toast("ok", `Indicator promoted to finding â€œ${f.title}â€ â€” traceable to analysis ${a.id.slice(0, 8)}.`);
+      toast("ok", `Indicator promoted to finding “${f.title}” — traceable to analysis ${a.id.slice(0, 8)}.`);
     } catch (e) {
       toast("err", errMsg(e));
     } finally {
@@ -214,7 +214,7 @@ export default function AiPage() {
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="space-y-4 lg:col-span-2">
         <Panel
-          title="correlation engine â€” â€œwhat happened?â€"
+          title="correlation engine — “what happened?”"
           variant="cyan"
           right={
             <Btn size="sm" variant="primary" busy={running} onClick={() => void runCorrelation()} disabled={evidenceTotal === 0}>
@@ -224,24 +224,24 @@ export default function AiPage() {
         >
           {evidenceTotal === 0 && (
             <div className="p-4">
-              <Empty text="no evidence to correlate" hint="AI never fabricates evidence â€” collect artifacts first (FQL console or Script Lab), then run correlation." />
+              <Empty text="no evidence to correlate" hint="AI never fabricates evidence — collect artifacts first (FQL console or Script Lab), then run correlation." />
             </div>
           )}
           {evidenceTotal > 0 && running && !latest && (
-            <div className="p-4"><Spinner label="correlating user â†’ process â†’ file â†’ network â†’ event" /></div>
+            <div className="p-4"><Spinner label="correlating user →’ process →’ file →’ network →’ event" /></div>
           )}
           {latest ? (
             <CorrelationView a={latest} onPromote={(i) => void promote(latest, i)} promoting={promoting} />
           ) : (
             evidenceTotal > 0 && !running && (
               <div className="p-4">
-                <Empty text="no correlation run yet" hint={`Press â€œrun correlationâ€ to reconstruct the incident from ${evidenceTotal} collected evidence item(s).`} />
+                <Empty text="no correlation run yet" hint={`Press “run correlation” to reconstruct the incident from ${evidenceTotal} collected evidence item(s).`} />
               </div>
             )
           )}
         </Panel>
 
-        <Panel title={`analysis history â€” ${analyses.data?.data.length ?? 0}`}>
+        <Panel title={`analysis history — ${analyses.data?.data.length ?? 0}`}>
           {(analyses.data?.data.length ?? 0) === 0 && <Empty text="no analyses yet" />}
           <div className="max-h-56 divide-y divide-grid overflow-y-auto">
             {(analyses.data?.data ?? []).map((a) => (
@@ -260,7 +260,7 @@ export default function AiPage() {
       </div>
 
       <div className="space-y-4">
-        <Panel title="evidence q&a â€” retrieval-augmented">
+        <Panel title="evidence q&a — retrieval-augmented">
           <div className="space-y-2 p-3">
             <p className="text-[10.5px] leading-relaxed text-faint">
               Questions are answered from the case&apos;s own embedded evidence (local RAG). Answers always list the
@@ -295,7 +295,7 @@ export default function AiPage() {
                         <ConfidenceBar value={m.confidence} />
                         {m.engine && <span className="text-[9.5px] uppercase tracking-wider text-faint">{m.engine}</span>}
                       </div>
-                      {m.caveat && <p className="mt-1 text-[10px] text-amber">âš  {m.caveat}</p>}
+                      {m.caveat && <p className="mt-1 text-[10px] text-amber">⚠ {m.caveat}</p>}
                     </>
                   )}
                 </div>
@@ -309,7 +309,7 @@ export default function AiPage() {
           <div className="max-h-40 divide-y divide-grid overflow-y-auto">
             {queries.slice(0, 8).map((q) => (
               <p key={q.id} className="truncate px-3 py-1.5 text-[10.5px] text-muted" title={q.result?.answer ?? ""}>
-                <b className="text-accent">Q</b> {(q.result as { question?: string } | null)?.question ?? q.id.slice(0, 8)} Â·{" "}
+                <b className="text-accent">Q</b> {(q.result as { question?: string } | null)?.question ?? q.id.slice(0, 8)} ·{" "}
                 <span className="text-faint">{fmtTime(q.created_at ?? null)}</span>
               </p>
             ))}

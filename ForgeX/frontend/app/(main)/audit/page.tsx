@@ -49,7 +49,7 @@ export default function AuditPage() {
               <p className="hud-title text-alarm">// permission denied</p>
               <p className="mt-2 text-[12.5px] leading-relaxed text-muted">
                 The audit trail is restricted to <b className="text-ink">ADMIN</b> and <b className="text-ink">AUDITOR</b> roles.
-                Your current role (<b className="text-accent">{user?.role ?? "anonymous"}</b>) cannot read it â€” this attempt itself would be
+                Your current role (<b className="text-accent">{user?.role ?? "anonymous"}</b>) cannot read it — this attempt itself would be
                 audit-logged server-side. RBAC matrix is documented in Settings.
               </p>
             </div>
@@ -67,7 +67,7 @@ export default function AuditPage() {
         <div>
           <h1 className="hud-title">// audit trail</h1>
           <p className="mt-1 text-[11.5px] text-faint">
-            append-only operator log â€” {list.data ? `${list.data.pagination.total} record(s)` : "â€¦"} â€” every login, query, execution, export and status change
+            append-only operator log — {list.data ? `${list.data.pagination.total} record(s)` : "…"} — every login, query, execution, export and status change
           </p>
         </div>
         <div className="flex-1" />
@@ -75,7 +75,7 @@ export default function AuditPage() {
           <option value="">ALL ACTIONS</option>
           {KNOWN_ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
         </select>
-        <input className="input w-52" placeholder="actor email containsâ€¦" value={actor} onChange={(e) => { setActor(e.target.value); setPage(1); }} />
+        <input className="input w-52" placeholder="actor email contains…" value={actor} onChange={(e) => { setActor(e.target.value); setPage(1); }} />
         <Btn
           variant="ghost"
           onClick={async () => {
@@ -91,13 +91,13 @@ export default function AuditPage() {
         </Btn>
       </div>
 
-      <Panel title="records">
+      <Panel title="records" bodyClass="overflow-x-auto">
         {list.loading && <div className="p-4"><Spinner label="reading audit ledger" /></div>}
-        {list.error && <div className="p-3 text-[12px] text-alarm">âš  {list.error}</div>}
+        {list.error && <div className="p-3 text-[12px] text-alarm">⚠ {list.error}</div>}
         {(list.data?.data.length ?? 0) === 0 && !list.loading && <Empty text="no audit records match" />}
         {list.data && list.data.data.length > 0 && (
           <>
-            <table className="tbl">
+            <table className="tbl min-w-[720px]">
               <thead>
                 <tr>
                   <th className="w-8" />
@@ -121,10 +121,10 @@ export default function AuditPage() {
                       </td>
                       <td className="font-bold tracking-wide text-ink">{a.action}</td>
                       <td className="max-w-56 truncate font-mono text-[10.5px] text-muted">
-                        {a.resource_type ?? "â€”"}{a.resource_id ? `:${a.resource_id.slice(0, 12)}` : ""}
+                        {a.resource_type ?? "—"}{a.resource_id ? `:${a.resource_id.slice(0, 12)}` : ""}
                       </td>
                       <td className={RESULT_STYLE[a.result] ?? "text-muted"}>{a.result}</td>
-                      <td className="font-mono text-[10.5px] text-faint">{a.ip_address ?? "â€”"}</td>
+                      <td className="font-mono text-[10.5px] text-faint">{a.ip_address ?? "—"}</td>
                     </tr>
                     {expanded === a.id && (
                       <tr>
@@ -143,8 +143,8 @@ export default function AuditPage() {
             <div className="flex items-center justify-between border-t border-edge px-3 py-2 text-[11px] text-faint">
               <span>page {page} / {totalPages}</span>
               <span className="flex gap-2">
-                <Btn size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>â—‚ prev</Btn>
-                <Btn size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>next â–¸</Btn>
+                <Btn size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>◂ prev</Btn>
+                <Btn size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>next ▷</Btn>
               </span>
             </div>
           </>

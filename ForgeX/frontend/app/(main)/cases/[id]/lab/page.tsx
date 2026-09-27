@@ -1,8 +1,8 @@
 "use client";
 
-// Script Lab â€” TEMPLATE-FIRST: the editor is never empty. Users start from one
+// Script Lab — TEMPLATE-FIRST: the editor is never empty. Users start from one
 // of the 10 forensic function templates, review the code, then validate/run it
-// in the sandboxed pipeline (validation â†’ policy â†’ sandbox â†’ findings â†’ audit).
+// in the sandboxed pipeline (validation →’ policy →’ sandbox →’ findings →’ audit).
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookOpenCheck, FileCode2, History, Play, Save, ScanSearch, Square, TerminalSquare, Wand2 } from "lucide-react";
@@ -32,7 +32,7 @@ type ValidationResult = ValidateOk | ValidateBad;
 function TemplatePreview({ tpl, onClose, onCreate }: { tpl: Template; onClose: () => void; onCreate: (name: string) => void }) {
   const [name, setName] = useState(tpl.title.toLowerCase().replace(/\s+/g, "-"));
   return (
-    <Modal open onClose={onClose} title={`template â€” ${tpl.title}`} wide>
+    <Modal open onClose={onClose} title={`template — ${tpl.title}`} wide>
       <div className="grid gap-4 lg:grid-cols-5">
         <div className="space-y-3 lg:col-span-2">
           <p className="badge border-cyanx/50 text-accent">{tpl.category}</p>
@@ -42,7 +42,7 @@ function TemplatePreview({ tpl, onClose, onCreate }: { tpl: Template; onClose: (
             <p className="mt-1">
               Templates ship with imports, function structure, parameters, expected output, examples and error
               handling pre-wired against the <code className="text-phosphorDim">forgex</code> SDK. Review the code,
-              adapt it to your hypothesis, then run it â€” execution is sandboxed, policy-checked and fully audited.
+              adapt it to your hypothesis, then run it — execution is sandboxed, policy-checked and fully audited.
             </p>
           </div>
           <div>
@@ -124,7 +124,7 @@ export default function ScriptLabPage() {
 
   const { connected } = useCaseSocket(inv?.id, useCallback((m: WsMessage) => {
     if (m.type === "SCRIPT_COMPLETE" && typeof m.execution_id === "string") {
-      toast("info", `Execution ${String(m.execution_id).slice(0, 8)} â†’ ${String(m.status)} (${String(m.findings ?? 0)} finding(s))`);
+      toast("info", `Execution ${String(m.execution_id).slice(0, 8)} →’ ${String(m.status)} (${String(m.findings ?? 0)} finding(s))`);
       void loadExec(String(m.execution_id));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -165,7 +165,7 @@ export default function ScriptLabPage() {
   async function createFromTemplate(tpl: Template, name: string) {
     try {
       const s = await post<Script>(`/api/v1/investigations/${inv!.id}/scripts`, { name, template_id: tpl.id });
-      toast("ok", `Script â€œ${s.name}â€ created from template ${tpl.id} â€” review the code, then run it.`);
+      toast("ok", `Script “${s.name}” created from template ${tpl.id} — review the code, then run it.`);
       setPreview(null);
       scripts.reload();
       await openScript(s.id);
@@ -202,7 +202,7 @@ export default function ScriptLabPage() {
       setDirty(false);
       setNote("");
       scripts.reload();
-      toast("ok", `Saved â€” now at version ${s.version}.`);
+      toast("ok", `Saved — now at version ${s.version}.`);
       return true;
     } catch (e) {
       toast("err", errMsg(e));
@@ -223,7 +223,7 @@ export default function ScriptLabPage() {
         if (dirty && !(await save())) return;
         r = await post(`/api/v1/scripts/${active!.id}/run`, { investigation_id: inv!.id });
       }
-      toast(r.status === "COMPLETED" ? "ok" : "warn", `Execution ${r.status}${r.findings ? ` â€” ${r.findings} finding(s)` : ""}`);
+      toast(r.status === "COMPLETED" ? "ok" : "warn", `Execution ${r.status}${r.findings ? ` — ${r.findings} finding(s)` : ""}`);
       await loadExec(r.execution_id);
     } catch (e) {
       toast("err", errMsg(e));
@@ -264,7 +264,7 @@ export default function ScriptLabPage() {
             ))}
             {scripts.loading && <div className="p-2"><Spinner /></div>}
             {!scripts.loading && (scripts.data?.data.length ?? 0) === 0 && (
-              <Empty text="no scripts yet" hint="Pick a template below â€” you never start from an empty editor." />
+              <Empty text="no scripts yet" hint="Pick a template below — you never start from an empty editor." />
             )}
           </div>
         </Panel>
@@ -302,7 +302,7 @@ export default function ScriptLabPage() {
           <Panel
             title={
               <span className="flex items-center gap-2">
-                forensic function â€” <b className="text-ink">{active.name}</b>
+                forensic function — <b className="text-ink">{active.name}</b>
                 <span className="badge border-edge2 text-faint">v{active.version}</span>
                 {dirty && <span className="badge border-amber/60 text-amber">unsaved edits</span>}
                 {active.template_id && <span className="badge border-violetx/50 text-muted">from {active.template_id}</span>}
@@ -334,7 +334,7 @@ export default function ScriptLabPage() {
                   <ScanSearch size={13} /> validate
                 </Btn>
                 <Btn variant="ghost" busy={busy === "save"} disabled={!dirty} onClick={() => void save()}>
-                  <Save size={13} /> save {dirty ? "â€¢" : ""}
+                  <Save size={13} /> save {dirty ? "•" : ""}
                 </Btn>
                 <Btn variant="primary" busy={busy === "run"} onClick={() => void run(false)}>
                   <Play size={13} /> save &amp; run
@@ -354,11 +354,11 @@ export default function ScriptLabPage() {
                 <div className={`mt-2.5 border p-2.5 text-[11.5px] ${validation.valid ? "border-phosphorDim bg-phosphor/5" : "border-alarm bg-alarm/10"}`}>
                   {validation.valid ? (
                     <p className="text-phosphorDim">
-                      âœ“ valid â€” entry <b>{validation.entry}</b>() Â· imports [{validation.imports.join(", ") || "none"}] Â· functions [{validation.functions.join(", ")}]
+                      ✓ valid — entry <b>{validation.entry}</b>() · imports [{validation.imports.join(", ") || "none"}] · functions [{validation.functions.join(", ")}]
                     </p>
                   ) : (
                     <>
-                      <p className="font-bold text-alarm">âœ— validation failed{validation.line ? ` (line ${validation.line})` : ""}</p>
+                      <p className="font-bold text-alarm">✗ validation failed{validation.line ? ` (line ${validation.line})` : ""}</p>
                       <ul className="mt-1 list-inside list-disc space-y-0.5 text-alarm/90">
                         {validation.problems.map((p, i) => (
                           <li key={i}>{p}</li>
@@ -374,7 +374,7 @@ export default function ScriptLabPage() {
           <Panel title="forensic function editor">
             <Empty
               text="template-first workspace"
-              hint="Select a template from the library to generate a fully-formed forensic function â€” imports, SDK bindings, error handling and forensic context included. You never start from an empty editor."
+              hint="Select a template from the library to generate a fully-formed forensic function — imports, SDK bindings, error handling and forensic context included. You never start from an empty editor."
             />
             <div className="grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-3">
               {tplList.slice(0, 6).map((t) => (
@@ -390,7 +390,7 @@ export default function ScriptLabPage() {
 
         {/* execution results */}
         <Panel title="execution results" variant="dim">
-          {execLoading && <div className="p-4"><Spinner label="sandbox executing â€” validation â†’ policy â†’ rlimit â†’ findings" /></div>}
+          {execLoading && <div className="p-4"><Spinner label="sandbox executing — validation →’ policy →’ rlimit →’ findings" /></div>}
           {!execLoading && !exec && <Empty text="no execution yet" hint="Run the function above. Results include findings, sandbox console output and real resource usage." />}
           {!execLoading && exec && (
             <div className="space-y-3 p-3">
@@ -400,7 +400,7 @@ export default function ScriptLabPage() {
                 <span className="text-faint">{fmtTime(exec.started_at ?? null)}</span>
                 {exec.resource_usage?.user_cpu_sec !== undefined && (
                   <span className="badge border-edge2 text-muted">
-                    cpu {Number(exec.resource_usage.user_cpu_sec).toFixed(3)}s Â· rss {Number(exec.resource_usage.max_rss_mb ?? 0).toFixed(1)}MB
+                    cpu {Number(exec.resource_usage.user_cpu_sec).toFixed(3)}s · rss {Number(exec.resource_usage.max_rss_mb ?? 0).toFixed(1)}MB
                   </span>
                 )}
                 {exec.status === "RUNNING" && (
@@ -426,7 +426,7 @@ export default function ScriptLabPage() {
 
               {(exec.findings?.length ?? 0) > 0 && (
                 <div>
-                  <p className="label">findings ({exec.findings!.length}) â€” each cites real evidence ids</p>
+                  <p className="label">findings ({exec.findings!.length}) — each cites real evidence ids</p>
                   <div className="space-y-1.5">
                     {exec.findings!.map((f) => (
                       <div key={f.id} className="border border-grid bg-void/60 p-2.5">

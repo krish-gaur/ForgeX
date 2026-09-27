@@ -17,12 +17,12 @@ const TEMPLATE_DOCS: Record<string, { sdk: string[]; output: string }> = {
   "registry-analysis": { sdk: ["forgex.registry()", "forgex.finding()"], output: "Persistence / Run-key findings with evidence citations" },
   "file-metadata-analysis": { sdk: ["forgex.files()", "forgex.metadata()", "forgex.hash.verify()"], output: "Suspicious-path & timestamp-anomaly findings" },
   "network-artifact-analysis": { sdk: ["forgex.network()", "forgex.finding()"], output: "C2, exfil and lateral-movement connection findings" },
-  "process-analysis": { sdk: ["forgex.processes()", "forgex.finding()"], output: "Encoded commands, LOLBins, suspicious parentâ†’child chains" },
+  "process-analysis": { sdk: ["forgex.processes()", "forgex.finding()"], output: "Encoded commands, LOLBins, suspicious parent→’child chains" },
   "memory-analysis": { sdk: ["forgex.memory()", "forgex.finding()"], output: "Injection / suspicious in-memory artifact findings" },
   "browser-artifact-analysis": { sdk: ["forgex.browser()", "forgex.finding()"], output: "Malicious download & C2-visit findings" },
   "timeline-generation": { sdk: ["forgex.timeline()", "forgex.artifact()"], output: "Unified cross-artifact timeline artifacts" },
   "hash-verification": { sdk: ["forgex.hash.verify()", "forgex.chain_of_custody()"], output: "Integrity pass/fail findings per artifact" },
-  "custom-function": { sdk: ["full forgex SDK surface"], output: "Your hypothesis, your logic â€” sandbox-enforced" },
+  "custom-function": { sdk: ["full forgex SDK surface"], output: "Your hypothesis, your logic — sandbox-enforced" },
 };
 
 export default function TemplatesPage() {
@@ -42,7 +42,7 @@ export default function TemplatesPage() {
   async function copy(t: Template) {
     try {
       await navigator.clipboard.writeText(t.code);
-      toast("ok", `${t.title} source copied â€” paste it into a case's Script Lab (or create from template there).`);
+      toast("ok", `${t.title} source copied — paste it into a case's Script Lab (or create from template there).`);
     } catch {
       toast("err", "Clipboard unavailable in this browser context.");
     }
@@ -51,17 +51,17 @@ export default function TemplatesPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-4 p-4">
       <div>
-        <h1 className="hud-title">// template library â€” forensic functions</h1>
+        <h1 className="hud-title">// template library — forensic functions</h1>
         <p className="mt-1 max-w-3xl text-[11.5px] leading-relaxed text-faint">
           Ten production-shaped templates for the <code className="text-phosphorDim">forgex</code> SDK. Each ships with
-          imports, entry-point structure, parameters, expected output, examples, error handling and forensic context â€”
+          imports, entry-point structure, parameters, expected output, examples, error handling and forensic context —
           the Script Lab instantiates them into editable, sandboxed scripts. Nothing here is a stub: every API shown is
           backed by the real collector/evidence/hash subsystem.
         </p>
       </div>
 
       {templates.loading && <Panel className="p-6"><Spinner label="loading template vault" /></Panel>}
-      {templates.error && <p className="border border-alarm/50 bg-alarm/10 px-3 py-2 text-[12px] text-alarm">âš  {templates.error}</p>}
+      {templates.error && <p className="border border-alarm/50 bg-alarm/10 px-3 py-2 text-[12px] text-alarm">⚠ {templates.error}</p>}
 
       {grouped.map(([cat, ts]) => (
         <div key={cat}>
@@ -77,13 +77,13 @@ export default function TemplatesPage() {
                     </span>
                     <div className="min-w-0">
                       <p className="truncate text-[12.5px] font-bold uppercase tracking-wider text-ink">{t.title}</p>
-                      <p className="font-mono text-[10px] text-muted">{t.id} Â· PYFUNC</p>
+                      <p className="font-mono text-[10px] text-muted">{t.id} · PYFUNC</p>
                     </div>
                   </div>
                   <p className="mt-2 flex-1 text-[11px] leading-relaxed text-muted">{t.description}</p>
                   {docs && (
                     <div className="mt-2 border-t border-grid pt-2 text-[10px] text-faint">
-                      <p><b className="text-muted">sdk:</b> {docs.sdk.join(" Â· ")}</p>
+                      <p><b className="text-muted">sdk:</b> {docs.sdk.join(" · ")}</p>
                       <p className="mt-0.5"><b className="text-muted">produces:</b> {docs.output}</p>
                     </div>
                   )}
@@ -92,7 +92,7 @@ export default function TemplatesPage() {
                     <Btn size="sm" variant="ghost" onClick={() => void copy(t)}><Copy size={11} /> copy</Btn>
                     {cases.data?.data[0] && (
                       <a href={`/cases/${cases.data.data[0].id}/lab`} className="btn-ghost btn-sm ml-auto">
-                        open in lab â–¸
+                        open in lab ▷
                       </a>
                     )}
                   </div>
@@ -104,11 +104,11 @@ export default function TemplatesPage() {
       ))}
 
       {!templates.loading && (templates.data?.templates.length ?? 0) === 0 && (
-        <Panel><Empty text="template vault empty" hint="backend/templates/functions/*.py not found â€” check TEMPLATE_DIR setting." /></Panel>
+        <Panel><Empty text="template vault empty" hint="backend/templates/functions/*.py not found — check TEMPLATE_DIR setting." /></Panel>
       )}
 
       {preview && (
-        <Modal open onClose={() => setPreview(null)} title={`${preview.title} â€” full source`} wide>
+        <Modal open onClose={() => setPreview(null)} title={`${preview.title} — full source`} wide>
           <div className="mb-2 flex items-center gap-2">
             <span className="badge border-cyanx/50 text-accent">{preview.category}</span>
             <span className="text-[11px] text-faint">{preview.description}</span>

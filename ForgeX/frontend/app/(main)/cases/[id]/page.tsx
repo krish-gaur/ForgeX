@@ -63,7 +63,7 @@ export default function CaseOverviewPage() {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <div className="space-y-4 lg:col-span-2">
-        <Panel title="intent console â€” fql" variant="cyan">
+        <Panel title="intent console — fql" variant="cyan">
           <div className="p-3">
             <FqlConsole investigationId={inv.id} onCollected={reload} />
           </div>
@@ -77,7 +77,7 @@ export default function CaseOverviewPage() {
         </div>
 
         <Panel title="recent collection jobs">
-          {(inv.recent_jobs?.length ?? 0) === 0 && <Empty text="no fql jobs yet" hint="Run your first intent above â€” e.g. INVESTIGATE processes." />}
+          {(inv.recent_jobs?.length ?? 0) === 0 && <Empty text="no fql jobs yet" hint="Run your first intent above — e.g. INVESTIGATE processes." />}
           {(inv.recent_jobs?.length ?? 0) > 0 && (
             <table className="tbl">
               <thead>
@@ -102,8 +102,8 @@ export default function CaseOverviewPage() {
           <div className="p-3">
             <KV k="Case ID" v={<span className="text-[11px]">{inv.id}</span>} mono />
             <KV k="Target" v={inv.target_host} mono />
-            <KV k="OS" v={inv.target_os ?? "â€”"} />
-            <KV k="Source" v={inv.source_mode === "DATASET" ? `dataset:${inv.source_path ?? "â€”"}` : "live-local"} mono />
+            <KV k="OS" v={inv.target_os ?? "—"} />
+            <KV k="Source" v={inv.source_mode === "DATASET" ? `dataset:${inv.source_path ?? "—"}` : "live-local"} mono />
             <KV k="Provenance" v={inv.provenance} />
             <KV k="Opened" v={fmtTime(inv.created_at)} mono />
             <KV k="Last activity" v={fmtTime(inv.last_activity ?? null)} mono />
@@ -128,7 +128,7 @@ export default function CaseOverviewPage() {
           </div>
         </Panel>
 
-        <Panel title="integrity ledger â€” hash chain" variant="dim">
+        <Panel title="integrity ledger — hash chain" variant="dim">
           <div className="space-y-2 p-3">
             <p className="text-[11px] leading-relaxed text-muted">
               Every evidence item is SHA-256 hashed and anchored to an append-only local hash-chain ledger
@@ -140,13 +140,13 @@ export default function CaseOverviewPage() {
             {chain && (
               <div className={`border p-2.5 text-[11.5px] ${chain.valid ? "border-phosphorDim bg-phosphor/5" : "border-alarm bg-alarm/10"}`}>
                 <p className={chain.valid ? "font-bold text-phosphorDim" : "font-bold text-alarm"}>
-                  {chain.valid ? "âœ“ CHAIN INTACT" : "âœ— CHAIN BROKEN"} â€” {chain.records} record(s)
+                  {chain.valid ? "✓ CHAIN INTACT" : "✗ CHAIN BROKEN"} — {chain.records} record(s)
                 </p>
                 {chain.anchor_backend && <p className="mt-1 text-faint">backend: {chain.anchor_backend}</p>}
                 {chain.head_hash && <p className="mt-1 text-faint">head: {shortHash(chain.head_hash, 16)}</p>}
                 {!chain.valid && (
                   <p className="mt-1 text-alarm">
-                    broken at {chain.broken_at_record_id ?? "?"} {chain.reason ? `â€” ${chain.reason}` : ""}
+                    broken at {chain.broken_at_record_id ?? "?"} {chain.reason ? `— ${chain.reason}` : ""}
                   </p>
                 )}
               </div>

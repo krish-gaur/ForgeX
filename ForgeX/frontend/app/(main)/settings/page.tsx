@@ -31,21 +31,21 @@ interface PolicyRow {
 }
 
 const RBAC_MATRIX: Array<{ cap: string; admin: string; lead: string; inv: string; aud: string }> = [
-  { cap: "Open / close cases", admin: "âœ“", lead: "âœ“", inv: "open own", aud: "â€”" },
-  { cap: "Run FQL collection", admin: "âœ“", lead: "âœ“", inv: "policy-gated", aud: "â€”" },
-  { cap: "Network collector", admin: "âœ“", lead: "âœ“", inv: "denied by policy", aud: "â€”" },
-  { cap: "Script Lab executions", admin: "âœ“", lead: "âœ“", inv: "âœ“ own cases", aud: "â€”" },
-  { cap: "Findings verify/dismiss", admin: "âœ“", lead: "âœ“", inv: "âœ“", aud: "â€”" },
-  { cap: "AI correlation / Q&A", admin: "âœ“", lead: "âœ“", inv: "âœ“", aud: "read results", },
-  { cap: "Generate / download reports", admin: "âœ“", lead: "âœ“", inv: "âœ“", aud: "â€”" },
-  { cap: "Read audit trail", admin: "âœ“", lead: "â€”", inv: "â€”", aud: "âœ“" },
-  { cap: "User management", admin: "âœ“", lead: "â€”", inv: "â€”", aud: "â€”" },
-  { cap: "Author collection policies", admin: "âœ“", lead: "read", inv: "read (preview)", aud: "â€”" },
-  { cap: "Seed demo data", admin: "âœ“", lead: "âœ“", inv: "â€”", aud: "â€”" },
+  { cap: "Open / close cases", admin: "✓", lead: "✓", inv: "open own", aud: "—" },
+  { cap: "Run FQL collection", admin: "✓", lead: "✓", inv: "policy-gated", aud: "—" },
+  { cap: "Network collector", admin: "✓", lead: "✓", inv: "denied by policy", aud: "—" },
+  { cap: "Script Lab executions", admin: "✓", lead: "✓", inv: "✓ own cases", aud: "—" },
+  { cap: "Findings verify/dismiss", admin: "✓", lead: "✓", inv: "✓", aud: "—" },
+  { cap: "AI correlation / Q&A", admin: "✓", lead: "✓", inv: "✓", aud: "read results", },
+  { cap: "Generate / download reports", admin: "✓", lead: "✓", inv: "✓", aud: "—" },
+  { cap: "Read audit trail", admin: "✓", lead: "—", inv: "—", aud: "✓" },
+  { cap: "User management", admin: "✓", lead: "—", inv: "—", aud: "—" },
+  { cap: "Author collection policies", admin: "✓", lead: "read", inv: "read (preview)", aud: "—" },
+  { cap: "Seed demo data", admin: "✓", lead: "✓", inv: "—", aud: "—" },
 ];
 
 const STARTER_POLICY_YAML = `name: hardened-investigation-policy
-description: Stricter variant â€” network collection requires lead role and active case.
+description: Stricter variant — network collection requires lead role and active case.
 allowed_collectors:
   - processes
   - files
@@ -107,7 +107,7 @@ function UsersPanel() {
   async function changeRole(u: AdminUser, role: string) {
     try {
       await patch(`/api/v1/admin/users/${u.id}`, { role });
-      toast("ok", `${u.username} role â†’ ${role}.`);
+      toast("ok", `${u.username} role →’ ${role}.`);
       users.reload();
     } catch (e) {
       toast("err", errMsg(e));
@@ -128,11 +128,11 @@ function UsersPanel() {
 
   return (
     <Panel
-      title={`operator accounts â€” ${users.data?.data.length ?? "â€¦"}`}
+      title={`operator accounts — ${users.data?.data.length ?? "…"}`}
       right={<Btn size="sm" variant="primary" onClick={() => setModal(true)}><UserPlus size={11} /> new user</Btn>}
     >
       {users.loading && <div className="p-4"><Spinner /></div>}
-      {users.error && <div className="p-3 text-[12px] text-alarm">âš  {users.error}</div>}
+      {users.error && <div className="p-3 text-[12px] text-alarm">⚠ {users.error}</div>}
       <table className="tbl">
         <thead>
           <tr><th>username</th><th>email</th><th>role</th><th>state</th><th>created</th><th className="text-right">actions</th></tr>
@@ -178,7 +178,7 @@ function UsersPanel() {
       </Modal>
 
       {pwFor && (
-        <Modal open onClose={() => setPwFor(null)} title={`reset passphrase â€” ${pwFor.username}`}>
+        <Modal open onClose={() => setPwFor(null)} title={`reset passphrase — ${pwFor.username}`}>
           <div className="space-y-3">
             <Field label="new passphrase" hint="min 8 characters"><input className="input" type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} autoFocus /></Field>
             <div className="flex justify-end gap-2">
@@ -222,7 +222,7 @@ function PoliciesPanel({ canAuthor }: { canAuthor: boolean }) {
     setCreating(true);
     try {
       await post("/api/v1/admin/policies", { name: name.trim(), description: null, yaml, is_default: false });
-      toast("ok", `Policy â€œ${name.trim()}â€ created â€” selectable per execution via policy_id.`);
+      toast("ok", `Policy “${name.trim()}” created — selectable per execution via policy_id.`);
       policies.reload();
     } catch (e) {
       toast("err", errMsg(e));
@@ -233,9 +233,9 @@ function PoliciesPanel({ canAuthor }: { canAuthor: boolean }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title={`collection policies â€” ${policies.data?.data.length ?? "â€¦"}`}>
+      <Panel title={`collection policies — ${policies.data?.data.length ?? "…"}`}>
         {policies.loading && <div className="p-4"><Spinner /></div>}
-        {policies.error && <div className="p-3 text-[12px] text-alarm">âš  {policies.error}</div>}
+        {policies.error && <div className="p-3 text-[12px] text-alarm">⚠ {policies.error}</div>}
         {(policies.data?.data.length ?? 0) === 0 && !policies.loading && <Empty text="no policies" />}
         <div className="divide-y divide-grid">
           {(policies.data?.data ?? []).map((p) => (
@@ -271,13 +271,13 @@ function PoliciesPanel({ canAuthor }: { canAuthor: boolean }) {
               <Btn variant="primary" busy={creating} disabled={!name.trim()} onClick={() => void create()}>create policy</Btn>
               {validation && (
                 <span className={`text-[11.5px] ${validation.valid ? "text-phosphorDim" : "text-alarm"}`}>
-                  {validation.valid ? "âœ“ schema valid â€” rules parsed" : `âœ— ${validation.error}`}
+                  {validation.valid ? "✓ schema valid — rules parsed" : `✗ ${validation.error}`}
                 </span>
               )}
             </div>
             <p className="text-[10px] leading-relaxed text-faint">
               Policies gate collectors per role and case status, restrict fields (paths, capture duration, item caps) and
-              rate-limit executions. The engine evaluates them BEFORE any collector touches a target â€” denials are
+              rate-limit executions. The engine evaluates them BEFORE any collector touches a target — denials are
               audit-logged with reasons.
             </p>
           </div>
@@ -327,7 +327,7 @@ export default function SettingsPage() {
               Sessions use short-lived JWT access tokens plus an httpOnly refresh cookie (<code>forgex_refresh</code>).
               Logins are rate-limited per IP; every sensitive action is written to the audit trail with your identity.
             </p>
-            <Btn variant="ghost" size="sm" onClick={() => void refresh()}>â†» refresh profile</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => void refresh()}>→» refresh profile</Btn>
           </div>
         </Panel>
 
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                 <p className="text-[11.5px] leading-relaxed text-muted">
                   Re-seed the deterministic <b className="text-amber">DEMO-Corp-Breach-2026</b> scenario: a synthetic
                   corporate intrusion corpus (processes, auth logs, network captures incl. a real .pcap, registry,
-                  browser, memory, users). All records are labeled <b className="text-amber">SYNTHETIC</b> end-to-end â€”
+                  browser, memory, users). All records are labeled <b className="text-amber">SYNTHETIC</b> end-to-end —
                   evidence rows, timeline, graph, findings, reports.
                 </p>
                 <Btn variant="primary" busy={seeding} onClick={() => void seedDemo()}>
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                 <tr key={r.cap}>
                   <td className="text-ink">{r.cap}</td>
                   {[r.admin, r.lead, r.inv, r.aud].map((v, i) => (
-                    <td key={i} className={`text-center ${v === "âœ“" ? "text-phosphorDim" : v === "â€”" ? "text-faint" : "text-amber"}`}>{v}</td>
+                    <td key={i} className={`text-center ${v === "✓" ? "text-phosphorDim" : v === "—" ? "text-faint" : "text-amber"}`}>{v}</td>
                   ))}
                 </tr>
               ))}

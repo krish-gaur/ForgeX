@@ -43,13 +43,13 @@ export default function ExecutionsPage() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Panel
-        title={`execution history â€” ${rows.length}`}
+        title={`execution history — ${rows.length}`}
         right={running.length ? <span className="badge animate-pulse-dot border-cyanx/60 text-accent">{running.length} active</span> : undefined}
       >
         {list.loading && <div className="p-4"><Spinner label="loading executions" /></div>}
-        {list.error && <div className="p-3 text-[12px] text-alarm">âš  {list.error}</div>}
+        {list.error && <div className="p-3 text-[12px] text-alarm">⚠ {list.error}</div>}
         {rows.length === 0 && !list.loading && (
-          <Empty text="no executions yet" hint="Run a forensic function from the Script Lab â€” every run lands here with its sandbox console and resource usage." />
+          <Empty text="no executions yet" hint="Run a forensic function from the Script Lab — every run lands here with its sandbox console and resource usage." />
         )}
         <div className="max-h-[68vh] overflow-y-auto">
           {rows.map((e) => (
@@ -62,7 +62,7 @@ export default function ExecutionsPage() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12px] font-bold text-ink">{scriptName(e.script_id)}</span>
                 <span className="block text-[10.5px] text-faint">
-                  {e.id.slice(0, 8)} Â· {fmtTime(e.started_at ?? null)} Â· {e.findings_count ?? 0} finding(s)
+                  {e.id.slice(0, 8)} · {fmtTime(e.started_at ?? null)} · {e.findings_count ?? 0} finding(s)
                 </span>
               </span>
               <StatusPill status={e.status} />
@@ -87,7 +87,7 @@ export default function ExecutionsPage() {
                   onClick={async () => {
                     try {
                       await post(`/api/v1/executions/${detail.id}/stop`);
-                      toast("info", "Stop signal sent â€” sandbox child will be terminated.");
+                      toast("info", "Stop signal sent — sandbox child will be terminated.");
                       setTimeout(() => void open(detail.id), 1500);
                     } catch (e) {
                       toast("err", errMsg(e));

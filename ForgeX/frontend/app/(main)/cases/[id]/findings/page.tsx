@@ -1,6 +1,6 @@
 "use client";
 
-// Findings review workflow: OPEN â†’ VERIFIED / DISMISSED, grouped by severity,
+// Findings review workflow: OPEN →’ VERIFIED / DISMISSED, grouped by severity,
 // every finding cites the real evidence ids it was derived from.
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -59,7 +59,7 @@ export default function FindingsPage() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="hud-title">// findings review</h2>
-        <span className="text-[11px] text-faint">{list.data?.data.length ?? 0} finding(s) â€” evidence-cited, never fabricated</span>
+        <span className="text-[11px] text-faint">{list.data?.data.length ?? 0} finding(s) — evidence-cited, never fabricated</span>
         <div className="flex-1" />
         <select className="select w-40" value={sev} onChange={(e) => setSev(e.target.value)}>
           <option value="">ALL SEVERITIES</option>
@@ -74,7 +74,7 @@ export default function FindingsPage() {
       </div>
 
       {list.loading && <Panel className="p-4"><Spinner label="loading findings" /></Panel>}
-      {list.error && <p className="border border-alarm/50 bg-alarm/10 px-3 py-2 text-[12px] text-alarm">âš  {list.error}</p>}
+      {list.error && <p className="border border-alarm/50 bg-alarm/10 px-3 py-2 text-[12px] text-alarm">⚠ {list.error}</p>}
       {!list.loading && (list.data?.data.length ?? 0) === 0 && (
         <Panel>
           <Empty
@@ -95,7 +95,7 @@ export default function FindingsPage() {
                   <StatusPill status={f.status} />
                   <span className="badge border-violetx/50 text-muted">{f.source}</span>
                   {f.mitre_techniques?.length ? (
-                    <span className="badge border-edge2 text-muted">{f.mitre_techniques.join(" Â· ")}</span>
+                    <span className="badge border-edge2 text-muted">{f.mitre_techniques.join(" · ")}</span>
                   ) : null}
                   <span className="ml-auto text-[10.5px] text-faint">{fmtTime(f.created_at)}</span>
                 </div>

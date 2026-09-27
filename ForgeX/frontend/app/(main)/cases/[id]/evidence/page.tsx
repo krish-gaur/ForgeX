@@ -36,7 +36,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     try {
       const d = await get<EvidenceItem>(`/api/v1/investigations/${inv.id}/evidence/${id}?verify=true`);
       const ok = d.integrity?.matches_stored;
-      toast(ok ? "ok" : "err", ok ? "Integrity verified â€” recomputed SHA-256 matches the stored hash." : "INTEGRITY MISMATCH â€” evidence was altered after collection!");
+      toast(ok ? "ok" : "err", ok ? "Integrity verified — recomputed SHA-256 matches the stored hash." : "INTEGRITY MISMATCH — evidence was altered after collection!");
       detail.reload();
     } catch (e) {
       toast("err", errMsg(e));
@@ -58,7 +58,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         </header>
         <div className="space-y-3 p-4">
           {detail.loading && <Spinner label="retrieving evidence record" />}
-          {detail.error && <p className="text-[12px] text-alarm">âš  {detail.error}</p>}
+          {detail.error && <p className="text-[12px] text-alarm">⚠ {detail.error}</p>}
           {e && (
             <>
               <div className="flex flex-wrap items-center gap-2">
@@ -74,7 +74,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 <div className={`flex items-center justify-center border px-2 text-[11px] font-bold uppercase tracking-wider ${
                   e.integrity ? (e.integrity.matches_stored ? "border-phosphorDim bg-phosphor/10 text-phosphorDim" : "border-alarm bg-alarm/10 text-alarm") : "border-edge text-faint"
                 }`}>
-                  {e.integrity ? (e.integrity.matches_stored ? "âœ“ hash intact" : "âœ— tampered") : "not yet verified"}
+                  {e.integrity ? (e.integrity.matches_stored ? "✓ hash intact" : "✗ tampered") : "not yet verified"}
                 </div>
               </div>
 
@@ -147,7 +147,7 @@ export default function EvidencePage() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <h2 className="hud-title">// evidence vault</h2>
-        <span className="text-[11px] text-faint">{list.data ? `${list.data.pagination.total} item(s) â€” hashed, anchored, exportable` : ""}</span>
+        <span className="text-[11px] text-faint">{list.data ? `${list.data.pagination.total} item(s) — hashed, anchored, exportable` : ""}</span>
         <div className="flex-1" />
         <select className="select w-52" value={type} onChange={(e) => { setType(e.target.value); setPage(1); }}>
           <option value="">ALL ARTIFACT TYPES</option>
@@ -157,7 +157,7 @@ export default function EvidencePage() {
         </select>
         <input
           className="input w-64"
-          placeholder="search payloadsâ€¦"
+          placeholder="search payloads…"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
@@ -167,7 +167,7 @@ export default function EvidencePage() {
 
       <Panel title="collected artifacts">
         {list.loading && <div className="p-4"><Spinner label="querying evidence vault" /></div>}
-        {list.error && <div className="p-3 text-[12px] text-alarm">âš  {list.error}</div>}
+        {list.error && <div className="p-3 text-[12px] text-alarm">⚠ {list.error}</div>}
         {list.data?.data.length === 0 && (
           <Empty
             text="no evidence matches"
@@ -193,7 +193,7 @@ export default function EvidencePage() {
                     const d = e.data ?? {};
                     const summary =
                       (d.name as string) || (d.path as string) || (d.dst_ip as string) || (d.username as string) ||
-                      (d.description as string) || (d.event_type as string) || (d.query as string) || "â€”";
+                      (d.description as string) || (d.event_type as string) || (d.query as string) || "—";
                     return (
                       <tr key={e.id} className="cursor-pointer" onClick={() => setSelected(e.id)}>
                         <td><TypeBadge type={e.evidence_type} /></td>
@@ -212,8 +212,8 @@ export default function EvidencePage() {
               <span>page {page} / {totalPages}</span>
               <span className="flex items-center gap-2">
                 <Boxes size={12} className="text-muted" />
-                <Btn size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>â—‚ prev</Btn>
-                <Btn size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>next â–¸</Btn>
+                <Btn size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>◂ prev</Btn>
+                <Btn size="sm" variant="ghost" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>next ▷</Btn>
               </span>
             </div>
           </>
