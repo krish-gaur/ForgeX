@@ -56,7 +56,7 @@ export default function LoginPage() {
           </h1>
           <p className="text-[10.5px] uppercase tracking-[0.2em] text-faint">
             Forensic Intelligence Workbench
-            <span className="mt-1 block tracking-[0.28em]">SIH26148 · NTRO</span>
+            <span className="mt-1 block tracking-[0.28em]">Demo Version</span>
           </p>
         </div>
 
