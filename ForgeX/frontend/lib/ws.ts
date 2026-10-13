@@ -1,61 +1,186 @@
+
 "use client";
 
-// Live case channel: WebSocket fan-out from the backend (JOB_STATUS / JOB_COMPLETE /
-// JOB_FAILED / SCRIPT_COMPLETE). Falls back to polling-friendly usage: consumers
-// treat `connected` as advisory and keep REST polling as the source of truth.
+// Live case channel: JOB_STATUS / JOB_COMPLETE / JOB_FAILED / SCRIPT_COMPLETE.
+// REST polling should remain the source of truth if the socket is disconnected.
+
 import { useEffect, useRef, useState } from "react";
 import { getToken } from "@/lib/api";
 
 export interface WsMessage {
   type: "JOB_STATUS" | "JOB_COMPLETE" | "JOB_FAILED" | "SCRIPT_COMPLETE" | string;
-  [k: string]: unknown;
+  [key: string]: unknown;
 }
 
-export function useCaseSocket(investigationId: string | null | undefined, onMessage: (m: WsMessage) => void) {
+const RECONNECT_DELAY_MS = 4000;
+const MAX_RECONNECT_DELAY_MS = 30000;
+
+function buildWebSocketUrl(
+  token: string,
+  investigationId: string
+): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_WS_URL;
+
+  // Configure this to point directly to your deployed backend.
+  // Example: wss://your-backend.onrender.com/ws
+  const url = configuredUrl
+    ? new URL(configuredUrl)
+    : new URL("/ws", window.location.origin);
+
+  // Convert HTTP(S) URLs to WebSocket protocols when necessary.
+  if (url.protocol === "https:") {
+    url.protocol = "wss:";
+  } else if (url.protocol === "http:") {
+    url.protocol = "ws:";
+  }
+
+  if (url.protocol !== "ws:" && url.protocol !== "wss:") {
+    throw new Error("NEXT_PUBLIC_WS_URL must use ws:// or wss://.");
+  }
+
+  url.searchParams.set("token", token);
+  url.searchParams.set("investigation_id", investigationId);
+
+  return url.toString();
+}
+
+export function useCaseSocket(
+  investigationId: string | null | undefined,
+  onMessage: (message: WsMessage) => void
+) {
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
-  const handler = useRef(onMessage);
-  handler.current = onMessage;
+  const handlerRef = useRef(onMessage);
+
+  // Keep the latest callback without reconnecting the socket.
+  handlerRef.current = onMessage;
 
   useEffect(() => {
-    if (!investigationId) return;
-    let closed = false;
-    let retry: ReturnType<typeof setTimeout> | null = null;
-    let ws: WebSocket | null = null;
+    if (!investigationId) {
+      setConnected(false);
+      return;
+    }
+
+    let disposed = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let socket: WebSocket | null = null;
+    let reconnectAttempts = 0;
 
     const connect = () => {
-      if (closed) return;
+      if (disposed) return;
+
       const token = getToken();
-      if (!token) return;
-      const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const url = `${proto}//${window.location.host}/ws?token=${encodeURIComponent(token)}&investigation_id=${encodeURIComponent(investigationId)}`;
-      try {
-        ws = new WebSocket(url);
-      } catch {
+
+      // Wait for authentication to become available.
+      if (!token) {
+        retryTimer = setTimeout(connect, RECONNECT_DELAY_MS);
         return;
       }
-      wsRef.current = ws;
-      ws.onopen = () => setConnected(true);
-      ws.onmessage = (ev) => {
+
+      let url: string;
+
+      try {
+        url = buildWebSocketUrl(token, investigationId);
+      } catch (error) {
+        console.error("WebSocket configuration error:", error);
+        setConnected(false);
+        return;
+      }
+
+      try {
+        socket = new WebSocket(url);
+        wsRef.current = socket;
+      } catch (error) {
+        console.error("Unable to create WebSocket:", error);
+        scheduleReconnect();
+        return;
+      }
+
+      socket.onopen = () => {
+        if (disposed || socket !== wsRef.current) {
+          socket?.close();
+          return;
+        }
+
+        reconnectAttempts = 0;
+        setConnected(true);
+      };
+
+      socket.onmessage = (event: MessageEvent<string>) => {
+        if (disposed || socket !== wsRef.current) return;
+
         try {
-          handler.current(JSON.parse(ev.data) as WsMessage);
+          const message = JSON.parse(event.data) as WsMessage;
+
+          if (
+            message !== null &&
+            typeof message === "object" &&
+            typeof message.type === "string"
+          ) {
+            handlerRef.current(message);
+          }
         } catch {
-          /* ignore malformed frames */
+          console.warn("Ignoring malformed WebSocket message.");
         }
       };
-      ws.onclose = () => {
-        setConnected(false);
-        if (!closed) retry = setTimeout(connect, 4000);
+
+      socket.onerror = () => {
+        // onclose handles reconnection.
+        socket?.close();
       };
-      ws.onerror = () => ws?.close();
+
+      socket.onclose = () => {
+        if (socket === wsRef.current) {
+          wsRef.current = null;
+          setConnected(false);
+        }
+
+        if (!disposed) {
+          scheduleReconnect();
+        }
+      };
+    };
+
+    const scheduleReconnect = () => {
+      if (disposed || retryTimer) return;
+
+      const delay = Math.min(
+        RECONNECT_DELAY_MS * 2 ** reconnectAttempts,
+        MAX_RECONNECT_DELAY_MS
+      );
+
+      reconnectAttempts += 1;
+
+      retryTimer = setTimeout(() => {
+        retryTimer = undefined;
+        connect();
+      }, delay);
     };
 
     connect();
+
     return () => {
-      closed = true;
-      if (retry) clearTimeout(retry);
-      wsRef.current?.close();
-      wsRef.current = null;
+      disposed = true;
+
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+      }
+
+      const currentSocket = socket;
+      socket = null;
+
+      if (wsRef.current === currentSocket) {
+        wsRef.current = null;
+      }
+
+      if (currentSocket) {
+        currentSocket.onopen = null;
+        currentSocket.onmessage = null;
+        currentSocket.onerror = null;
+        currentSocket.onclose = null;
+        currentSocket.close();
+      }
+
       setConnected(false);
     };
   }, [investigationId]);
